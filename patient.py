@@ -21,32 +21,35 @@ dict[5] je tole:
 class Patient(object):
 
 
-    def __init__(self, patient_id):
-        #self.flair = self.getFlair()
-        #self.t1 = self.getT1()
+    def __init__(self, patient_id,flair, t1, t1c, t2):
         self.id = patient_id
-        self.dirs = dict[patient_id]
-        self.input_arrays = self.getArrays()
-        """self.flair_dir = self.dirs[0]
-        self.t1_dir = self.dirs[1]
-        self.t1c_dir = self.dirs[2]
-        self."""
+        self.Arrays = [flair, t1, t1c, t2] #input
 
+    def getFlair(self):
+        return self.Arrays[0]
 
-    def getArrays(self):
-        images = []
-        for idx, i in enumerate(dict[self.id]):
-            images.append(sitk.GetArrayFromImage(sitk.ReadImage(dict[self.id][idx]))[77-64:77+64,128-80:128+80,120-72:120+72])
-        return np.array(images)[:4]
+    def setFlair(self, newFlair):
+        self.Arrays[0] = newFlair
+
+    def getT1(self):
+        return self.Arrays[1]
+
+    def setT1(self, newT1):
+        self.Arrays[1] = newT1
+
+    def getT1c(self):
+        return self.Arrays[2]
+
+    def setT1c(self, newT1c):
+        self.Arrays[2] = newT1c
+
+    def getT2(self):
+        return self.Arrays[3]
+
+    def setT2(self, newT2):
+        self.Arrays[3] = newT2
+
     def getLabels(self):
         # TODO: make each class own array with onehot encoding
         return 0
 
-    def getImages(self):
-        return self.dirs[1]
-    def getT1cDir(self):
-        return self.dirs[2]
-    def getT2Dir(self):
-        return self.dirs[3]
-    def getTruthDir(self):
-        return self.dirs[4]
