@@ -23,31 +23,12 @@ class Patient(object):
 
     def __init__(self, patient_id,flair, t1, t1c, t2):
         self.id = patient_id
-        self.Arrays = [flair, t1, t1c, t2] #input
+        self.flair = flair
+        self.t1 = t1
+        self.t1c = t1c
+        self.t2 = t2
 
-    def getFlair(self):
-        return self.Arrays[0]
 
-    def setFlair(self, newFlair):
-        self.Arrays[0] = newFlair
-
-    def getT1(self):
-        return self.Arrays[1]
-
-    def setT1(self, newT1):
-        self.Arrays[1] = newT1
-
-    def getT1c(self):
-        return self.Arrays[2]
-
-    def setT1c(self, newT1c):
-        self.Arrays[2] = newT1c
-
-    def getT2(self):
-        return self.Arrays[3]
-
-    def setT2(self, newT2):
-        self.Arrays[3] = newT2
 
     def getLabels(self):
         # TODO: make each class own array with onehot encoding

@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import dictionary
 import patient
 from sklearn import preprocessing
+import numpy.ma as ma
 
 
 
@@ -27,8 +28,8 @@ for i in list(range(1,11)):
 
 patients = []
 
-#funkcija, ki bo naredila seznam pacientov
-#slike so tu že predstavljene kot numpy matrike
+#funkcija, ki bo naredila seznam pacientov, kjer ima vsak pacient atributa ID in Arrays(input slike)
+#slike so tu že predstavljene kot numpy matrike imajo že masked values 0
 
 for id, images in tmpDict.items():
     flair = sitk.GetArrayFromImage(sitk.ReadImage(images[0])[77-64:77+64,128-80:128+80,120-72:120+72])
@@ -41,5 +42,14 @@ for id, images in tmpDict.items():
 
 #Standardizacija
 
+#izračunajmo povprečne vrednosti
+
+flairMeans = [] #seznam povprečnih vrednosti vseh matrik
+t1Means =[]
+t1cMeans = []
+t2Means = []
+
+for i in range(len(patients)):
+    patients[i].setFlair(3)
 
 
