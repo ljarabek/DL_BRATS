@@ -50,10 +50,10 @@ t1cMeans = []
 t2Means = []
 
 #izračun povprečnih vrednosti kvadratov
-flairMeansSqr =[]
-t1MeansSqr =[]
-t1cMeansSqr =[]
-t2MeansSqr =[]
+#flairMeansSqr =[]
+#t1MeansSqr =[]
+#t1cMeansSqr =[]
+#t2MeansSqr =[]
 
 #število pacientov
 n = len(patients)
@@ -83,3 +83,18 @@ meanT1c = sum(t1cMeans)/n
 meanT2 = sum(t2Means)/n
 
 
+#TODO: Izračun standardnih deviacij
+stdFlair = 1
+stdT1 = 1
+stdT1c = 1
+stdT2 = 1
+
+#Standardizacija
+
+for patient in patients:
+    patient.flair = (patient.flair - meanFlair)/stdFlair
+    patient.t1 = (patient.t1 - meanT1)/stdT1
+    patient.t1c = (patient.t1c - meanT1c) / stdT1c
+    patient.t2 = (patient.t2 - meanT2) / stdT2
+
+#TODO: Shraniti vse standardizirane matirke

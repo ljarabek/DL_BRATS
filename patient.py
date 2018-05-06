@@ -29,6 +29,10 @@ class Patient(object):
         self.t2 = t2
 
 
+    def getArray(self):
+        "Vrne matriko inputa "
+        return [self.flair, self.t1, self.t1c,self.t2]
+
 
     def getLabels(self):
         # TODO: make each class own array with onehot encoding
