@@ -49,7 +49,37 @@ t1Means =[]
 t1cMeans = []
 t2Means = []
 
-for i in range(len(patients)):
-    patients[i].setFlair(3)
+#izračun povprečnih vrednosti kvadratov
+flairMeansSqr =[]
+t1MeansSqr =[]
+t1cMeansSqr =[]
+t2MeansSqr =[]
+
+#število pacientov
+n = len(patients)
+
+for i in range(n):
+    #vsem matrikam pacienta damo masked_values 0
+    patients[i].flair = ma.masked_values(patients[i].flair, 0)
+    patients[i].t1= ma.masked_values(patients[i].t1, 0)
+    patients[i].t1c = ma.masked_values(patients[i].t1c, 0)
+    patients[i].t2 = ma.masked_values(patients[i].t2, 0)
+
+    flair = patients[i].flair
+    t1 = patients[i].t1
+    t1c = patients[i].t1c
+    t2 = patients[i].t2
+
+    #dodamo povprečja matrik v sezname
+    flairMeans.append(flair.mean())
+    t1Means.append(t1.mean())
+    t1cMeans.append(t1c.mean())
+    t2Means.append(t2.mean())
+
+#končna povprečja (E(X))
+meanFlair = sum(flairMeans)/ n
+meanT1 = sum(t1Means)/n
+meanT1c = sum(t1cMeans)/n
+meanT2 = sum(t2Means)/n
 
 
