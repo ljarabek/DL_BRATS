@@ -6,6 +6,8 @@ import patient
 from sklearn import preprocessing
 import numpy.ma as ma
 
+#število pacientov
+n = 50
 
 
 dict = dictionary.get() #a dictionary of patients, every patient has 5 values (images)
@@ -23,9 +25,12 @@ dict[5] je tole:
 #temporary dicitonary(za testiranje)
 tmpDict = {}
 
-for i in list(range(1,11)):
-    tmpDict[i] = dict[i]
+for i, dict_id in enumerate(dict):
+    tmpDict[i] = dict[dict_id]
+    if (i+2>n):
+        break
 
+print(len(tmpDict))
 patients = []
 
 #funkcija, ki bo naredila seznam pacientov, kjer ima vsak pacient atributa ID in Arrays(input slike)
@@ -42,21 +47,19 @@ for id, images in tmpDict.items():
 
 #Standardizacija
 
-#izračunajmo povprečne vrednosti
-
-flairMeans = [] #seznam povprečnih vrednosti vseh matrik
-t1Means =[]
-t1cMeans = []
-t2Means = []
-
-#izračun povprečnih vrednosti kvadratov
-#flairMeansSqr =[]
-#t1MeansSqr =[]
-#t1cMeansSqr =[]
-#t2MeansSqr =[]
-
 #število pacientov
-n = len(patients)
+size = patients[0].flair.size #število elemntov v matriki
+
+sumFlair = 0 #vsota elemntov
+sumT1 = 0
+sumT1c = 0
+sumT2 = 0
+
+NFlair= 0 #število nemaskiranih elemntov
+NT1 = 0
+NT1c = 0
+NT2 = 0
+
 
 for i in range(n):
     #vsem matrikam pacienta damo masked_values 0
@@ -70,31 +73,59 @@ for i in range(n):
     t1c = patients[i].t1c
     t2 = patients[i].t2
 
-    #dodamo povprečja matrik v sezname
-    flairMeans.append(flair.mean())
-    t1Means.append(t1.mean())
-    t1cMeans.append(t1c.mean())
-    t2Means.append(t2.mean())
+    sumFlair += np.int64(flair.sum())
+    NFlair += size - ma.count_masked(flair)
 
-#končna povprečja (E(X))
-meanFlair = sum(flairMeans)/ n
-meanT1 = sum(t1Means)/n
-meanT1c = sum(t1cMeans)/n
-meanT2 = sum(t2Means)/n
+    sumT1 += np.int64(t1.sum())
+    NT1 = size - ma.count_masked(t1)
+
+    sumT1c += np.int64(t1c.sum())
+    NT1c += size - ma.count_masked(t1c)
+
+    sumT2 += np.int64(t2.sum())
+    NT2 += size - ma.count_masked(t2)
+
+#izračun povprečnih vrednosti
+meanFlair = sumFlair / NFlair
+meanT1 = sumT1 / NT1
+meanT1c = sumT1c / NT1c
+meanT2 = sumT2 / NT2
 
 
-#TODO: Izračun standardnih deviacij
-stdFlair = 1
-stdT1 = 1
-stdT1c = 1
-stdT2 = 1
+sumVarFlair = 0 # vsota (x_i - mean)**2
+sumVarT1 = 0
+sumVarT1c = 0
+sumVarT2 = 0
 
-#Standardizacija
+#izračun vsote za varianco
+for i in range(n):
+    flair = patients[i].flair
+    t1 = patients[i].t1
+    t1c = patients[i].t1c
+    t2 = patients[i].t2
 
-for patient in patients:
-    patient.flair = (patient.flair - meanFlair)/stdFlair
-    patient.t1 = (patient.t1 - meanT1)/stdT1
-    patient.t1c = (patient.t1c - meanT1c) / stdT1c
-    patient.t2 = (patient.t2 - meanT2) / stdT2
+    sumVarFlair += ( ( flair - meanFlair ) ** 2).sum()
+    sumVarT1 += ( (t1 - meanT1) ** 2).sum()
+    sumVarT1c += ( (t1c - meanT1c) ** 2).sum()
+    sumVarT2 += ( (t2 - meanT2) ** 2).sum()
 
-#TODO: Shraniti vse standardizirane matirke
+#izračun standardnega odklona....std(X) = ( VarX )**0.5
+
+stdFlair = (sumVarFlair / NFlair )**0.5
+stdT1 = ( sumVarT1 / NT1) ** 0.5
+stdT1c = ( sumVarT1c / NT1c) ** 0.5
+stdT2 = (sumVarT2 / NT2) ** 0.5
+
+
+
+
+
+
+
+
+
+
+
+
+
+
