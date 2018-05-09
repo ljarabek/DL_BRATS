@@ -5,8 +5,10 @@ import numpy as np
 import numpy.ma as ma
 from tqdm import tqdm
 from patient import Patient
+import os
 
-
+"""if not os.path.exists('/pre/'):
+    os.makedirs('/pre/')"""
 
 dct = dictionary.get() #vse je dolgo 188
 #sitk.Show(sitk.ReadImage(dct[5][2]))
@@ -14,10 +16,10 @@ dct = dictionary.get() #vse je dolgo 188
 
 def getMaskedArray(i, mod):
     '''returns un-cropped array'''
-    return ma.masked_values(sitk.GetArrayFromImage(sitk.ReadImage(dct[i][mod])),0)
+    return ma.masked_values(sitk.GetArrayFromImage(sitk.ReadImage(dct[i][mod]))[77-64:77+64,128-80:128+80,120-72:120+72],0)
 ###     STEVILO VREDNOSTI
 
-def getN(modality=0, _maxid = 1e9): #267839313
+def getN(modality=0): #267839313
     '''Returns avg and SD
     modality: 0-flair, 1-T1, 2-T1c, 3-T2'''
     n = np.uint64(0)
@@ -29,14 +31,11 @@ def getN(modality=0, _maxid = 1e9): #267839313
         return 0
     for d in tqdm(dct):
         buffer = getMaskedArray(d, modality)
-        """if d%10==0:
-            ha = [d for d in tqdm(buffer.flatten()) if d>0]
-            plt.hist(ha)
-            plt.show()"""
         sum += np.sum(buffer)
         sums.append(np.sum(buffer))
         sumOfSquares += np.sum(np.square(buffer))
-        n += buffer.count()
+        n += ma.count(buffer)
+    print(n)
     average = np.divide(sum, n)
     averageSquared = np.square(average)
     averageOfSquares = np.divide(sumOfSquares,n)
@@ -44,7 +43,44 @@ def getN(modality=0, _maxid = 1e9): #267839313
     SD = np.sqrt(variance)
 
     return average, SD  # (325.77115552114634, 325.515874279643)
+def getAvg(modality = 0):
+    n = np.uint64(0)
+    sum = np.uint(0)
+    for d in dct:
+        buffer = getMaskedArray(d, modality)
+        sum += buffer.sum()
+        n += ma.count(buffer)  # 326.62273804171326
+        #n += buffer.size - ma.count_masked(buffer)  #326.62273804171326
+    return(float(sum/n))
 
+def getStd(modality = 0):
+    n = np.uint64(0)
+    sum = np.uint(0)
+    avg = getAvg(modality=modality)
+    for d in dct:
+        buffer = getMaskedArray(d, modality)
+        sum += np.square(buffer - avg).sum()
+        n += ma.count(buffer)  # 326.62273804171326
+        # n += buffer.size - ma.count_masked(buffer)  #326.62273804171326
+    return(np.sqrt(np.divide(sum, n)))
+
+print('flair')
+print(getAvg(0))
+print(getStd(0))
+print('t1')
+print(getAvg(1))
+print(getStd(1))
+print('t1c')
+print(getAvg(2))
+print(getStd(2))
+print('t2')
+print(getAvg(3))
+print(getStd(3))
+
+
+
+#print(getN(2))
+#print(getN(1))
 def outputToChannels(id):
     """ ta koda je sexy """
     arr = np.array(sitk.GetArrayFromImage(sitk.ReadImage(dct[id][4])))
@@ -68,7 +104,6 @@ plt.show()
 plt.imshow(heh[0,65])
 plt.show()
 #def loss(a, b):"""
-print(getN(0))
 
 #print(np.array(sitk.GetArrayFromImage(sitk.ReadImage(dct[3][0]))[77-64:77+64,128-80:128+80,120-72:120+72]).shape)
 #print(getN()) #(267839313.0, 87254322490.0, 44531328854.0)
