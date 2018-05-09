@@ -36,7 +36,7 @@ patients = []
 #funkcija, ki bo naredila seznam pacientov, kjer ima vsak pacient atributa ID in Arrays(input slike)
 #slike so tu že predstavljene kot numpy matrike imajo že masked values 0
 
-for id, images in tmpDict.items():
+for id, images in dict.items():
     flair = sitk.GetArrayFromImage(sitk.ReadImage(images[0])[77-64:77+64,128-80:128+80,120-72:120+72])
     t1 = sitk.GetArrayFromImage(sitk.ReadImage(images[1])[77-64:77+64,128-80:128+80,120-72:120+72])
     t1c = sitk.GetArrayFromImage(sitk.ReadImage(images[2])[77-64:77+64,128-80:128+80,120-72:120+72])
@@ -44,6 +44,8 @@ for id, images in tmpDict.items():
 
     pat = patient.Patient(id,flair,t1,t1c,t2)
     patients.append(pat)
+    print(id)
+
 
 #Standardizacija
 
@@ -116,8 +118,21 @@ stdT1 = ( sumVarT1 / NT1) ** 0.5
 stdT1c = ( sumVarT1c / NT1c) ** 0.5
 stdT2 = (sumVarT2 / NT2) ** 0.5
 
+print("Flair")
+print(meanFlair)
+print(stdFlair)
 
+print("T1")
+print(meanT1)
+print(stdT1)
 
+print("T1c")
+print(meanT1c)
+print(stdT1c)
+
+print("T2")
+print(meanT2)
+print(stdT2)
 
 
 
