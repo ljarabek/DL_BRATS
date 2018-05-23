@@ -78,7 +78,7 @@ def getBatchTraining():     #  Zanekrat je ozadje 0  -da ne vpliva na gradient
     key = rand.choice(list(dct))
     arr = []
     answers = outputToChannels(key)
-    for i in tqdm(range(4)):
+    for i in range(4):
         arr.append(standardize(getMaskedArray(key, mod =i),
                                i))
 
@@ -90,7 +90,7 @@ def getBatchTraining():     #  Zanekrat je ozadje 0  -da ne vpliva na gradient
 #print(getN(1))
 def outputToChannels(id):
     """ ta koda je sexy """
-    arr = np.array(sitk.GetArrayFromImage(sitk.ReadImage(dct[id][4])))
+    arr = np.array(sitk.GetArrayFromImage(sitk.ReadImage(dct[id][4])))[77 - 64:77 + 64, 128 - 80:128 + 80, 120 - 72:120 + 72]
     zeros = np.expand_dims(np.zeros(arr.size),0)  # or shape...
     buffer = np.zeros(arr.size)
     buffer = np.append([buffer, buffer, buffer, buffer], zeros, 0)
