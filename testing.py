@@ -3,6 +3,7 @@ import SimpleITK as sitk
 import matplotlib.pyplot as plt
 import numpy as np
 import numpy.ma as ma
+import random as rand
 from tqdm import tqdm
 from patient import Patient
 import os
@@ -15,7 +16,8 @@ dct = dictionary.get() #vse je dolgo 188
 
 def getMaskedArray(i, mod):
     '''returns un-cropped array'''
-    return ma.masked_values(sitk.GetArrayFromImage(sitk.ReadImage(dct[i][mod]))[77-64:77+64,128-80:128+80,120-72:120+72],0)
+    arr = sitk.GetArrayFromImage(sitk.ReadImage(dct[i][mod]))[77 - 64:77 + 64, 128 - 80:128 + 80, 120 - 72:120 + 72]
+    return ma.masked_values(arr,0)
 ###     STEVILO VREDNOSTI
 
 def getAvg(modality = 0):
@@ -68,7 +70,21 @@ print('t2')
 print(getAvg(3))
 print(getStd(3))"""
 
+def standardize(arr, mod):
+    return (arr-getAvg(mod))/(getStd(mod) + 0.000000001)
 
+def getBatchTraining():     #  Zanekrat je ozadje 0  -da ne vpliva na gradient
+                    #  Lahko spremeniš z tem, da daš filled v standardize
+    key = rand.choice(list(dct))
+    arr = []
+    answers = outputToChannels(key)
+    for i in tqdm(range(4)):
+        arr.append(standardize(getMaskedArray(key, mod =i),
+                               i))
+
+    data = np.ma.masked_array(arr).filled(0)
+
+    return data, answers
 
 #print(getN(2))
 #print(getN(1))
@@ -83,6 +99,21 @@ def outputToChannels(id):
     [x,y,z] = arr.shape
     return np.reshape(buffer, newshape=(5,x,y,z))
 
+input, output = getBatchTraining()
+
+
+#plt.imshow(getBatch()[0][64])
+#plt.show()
+
+
+
+"""def getBatch(size = 15, min= 0, max = 146):              BATCH SIZE je 1!!!
+    arr = []
+    for i in range(size):
+        int = np.random.randint(min, max, None)
+        for m in range(4):
+            arr.append(standardize)
+getMaskedArray(1, 0)"""
 
 """heh = outputToChannels(3)
 print(outputToChannels(3))
