@@ -7,9 +7,8 @@ from tqdm import tqdm
 from patient import Patient
 import os
 
-"""if not os.path.exists('/pre/'):
-    os.makedirs('/pre/')"""
-
+if not os.path.exists('./preprocess/'):
+    os.makedirs('./preprocess/')
 dct = dictionary.get() #vse je dolgo 188
 #sitk.Show(sitk.ReadImage(dct[5][2]))
 
@@ -19,31 +18,12 @@ def getMaskedArray(i, mod):
     return ma.masked_values(sitk.GetArrayFromImage(sitk.ReadImage(dct[i][mod]))[77-64:77+64,128-80:128+80,120-72:120+72],0)
 ###     STEVILO VREDNOSTI
 
-def getN(modality=0): #267839313
-    '''Returns avg and SD
-    modality: 0-flair, 1-T1, 2-T1c, 3-T2'''
-    n = np.uint64(0)
-    sum = np.uint64(0)
-    sumOfSquares = np.uint64(0)
-    sums =[]
-    if (modality>=4):
-        print('Cant preprocess output images')
-        return 0
-    for d in tqdm(dct):
-        buffer = getMaskedArray(d, modality)
-        sum += np.sum(buffer)
-        sums.append(np.sum(buffer))
-        sumOfSquares += np.sum(np.square(buffer))
-        n += ma.count(buffer)
-    print(n)
-    average = np.divide(sum, n)
-    averageSquared = np.square(average)
-    averageOfSquares = np.divide(sumOfSquares,n)
-    variance = averageSquared - averageOfSquares
-    SD = np.sqrt(variance)
-
-    return average, SD  # (325.77115552114634, 325.515874279643)
 def getAvg(modality = 0):
+    try:
+        avg = np.load('./preprocess/avg{}.npy'.format(modality))
+        return avg
+    except IOError:
+        print('AVG for modality {} not found, generating average'.format(modality))
     n = np.uint64(0)
     sum = np.uint(0)
     for d in dct:
@@ -51,9 +31,16 @@ def getAvg(modality = 0):
         sum += buffer.sum()
         n += ma.count(buffer)  # 326.62273804171326
         #n += buffer.size - ma.count_masked(buffer)  #326.62273804171326
-    return(float(sum/n))
+    avg = np.float32(sum/n)
+    np.save('./preprocess/avg{}.npy'.format(modality), avg)
+    return(avg)
 
 def getStd(modality = 0):
+    try:
+        avg = np.load('./preprocess/std{}.npy'.format(modality))
+        return avg
+    except IOError:
+        print('STD for modality {} not found, generating std'.format(modality))
     n = np.uint64(0)
     sum = np.uint(0)
     avg = getAvg(modality=modality)
@@ -62,9 +49,13 @@ def getStd(modality = 0):
         sum += np.square(buffer - avg).sum()
         n += ma.count(buffer)  # 326.62273804171326
         # n += buffer.size - ma.count_masked(buffer)  #326.62273804171326
-    return(np.sqrt(np.divide(sum, n)))
+    std = np.float32(np.sqrt(np.divide(sum, n)))
+    np.save('./preprocess/std{}.npy'.format(modality), std)
+    return(std)
 
-print('flair')
+
+
+"""print('flair')
 print(getAvg(0))
 print(getStd(0))
 print('t1')
@@ -75,7 +66,7 @@ print(getAvg(2))
 print(getStd(2))
 print('t2')
 print(getAvg(3))
-print(getStd(3))
+print(getStd(3))"""
 
 
 
@@ -91,6 +82,8 @@ def outputToChannels(id):
     buffer[flat, np.arange(arr.size)] = 1
     [x,y,z] = arr.shape
     return np.reshape(buffer, newshape=(5,x,y,z))
+
+
 """heh = outputToChannels(3)
 print(outputToChannels(3))
 plt.imshow(heh[4,65])
