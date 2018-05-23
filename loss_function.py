@@ -7,9 +7,9 @@ def jaccard_loss(P,T):
 
     #power stand for |.| (moc mnozice)
     #PT stands for the element wise product of matrix P and T
-    PT = tf.norm(tf.multiply(P,T))
-    P = tf.norm(tf.reduce_sum(P))
-    T = tf.norm(tf.reduce_sum(T))
+    PT = tf.norm(tf.multiply(P,T), ord=2)
+    P = tf.norm(P, ord=2)
+    T = tf.norm(T, ord=2)
 
     return 1 - tf.divide(PT, P**2 + T ** 2 - PT)
 
