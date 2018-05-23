@@ -19,7 +19,10 @@ _input = np.expand_dims(_input, 0)
 print(_input.shape)  #  (1, 4, 128, 160, 144)  -->  (1, 128, 160, 144, 4)
 
 A = tf.placeholder(dtype = tf.float32, shape = _input.shape)
-Ar = tf.reshape(A, shape=(1, 128, 160, 144, 4))
+#Ar = tf.reshape(A, shape=(1, 128, 160, 144, 4))
+
+Ar = tf.transpose(A, perm = [0,2,3,4,1]) #(1, 4, 128, 160, 144)  -->  1 index in inpuza hočem d aje na 2-jki(1, 128, 160, 144, 4)
+print(Ar.shape)
 B = tf.placeholder(dtype = tf.float32)
 
 def conv3D(input, name, stride = 1):
@@ -31,17 +34,22 @@ def conv3D(input, name, stride = 1):
 
 
 
-output1 = conv3D(Ar, "ime")
+output1 = tf.transpose(conv3D(Ar, "ime"), [0,4,1,2,3])  # (1, 128, 160, 144, 4)  -->  (1, 4, 128, 160, 144)
+
+
 
 output2 = conv3D(output1, "ime2", stride = 2)
 
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
-    otpt = sess.run(Ar, feed_dict={A:_input})
-    plt.imshow(otpt[0, :,:,:,2][64])
-    plt.show()
+    otpt = sess.run(output1, feed_dict={A:_input})
+    print(otpt.shape)
     #print(_input.shape)
     #sha = sess.run(output, feed_dict={A:_input, B: _answer[0:4]})
+    plt.imshow(_input[0, 2, :, :, 64])
+    plt.show()
+    plt.imshow(otpt[0, 2, :, :, 64])
+    plt.show()
 
 #plt.imshow(sha[3][64])
 #plt.show()
