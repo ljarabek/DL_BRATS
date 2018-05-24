@@ -79,8 +79,13 @@ def prelu(input, alphax = 0.2):
     alpha = tf.Variable(alphax, True)
     return tf.nn.leaky_relu(input, alpha=alpha)
 
-def expandingBlock(input, skip_input,phase_train, features_input, name = "contrblock"):
-    features = features_input/2
+def expandingBlock(input, skip_input,phase_train, features_input, name = "contrblock", concat_inputs = False,
+                   concatenation = False ):
+
+    if concat_inputs:
+        features = features_input/4
+    else:
+        features = features_input/2
     output = conv3D(input,features=features, stride=1, kernel=1,name=name + "_1x1x1conv")
     output = batch_norm(output, features,phase_train=phase_train)
 
@@ -88,10 +93,12 @@ def expandingBlock(input, skip_input,phase_train, features_input, name = "contrb
     output= deconv3D(output, features,stride=2, kernel=3, name=name + "_deconv")
     output = batch_norm(output, features, phase_train=phase_train)
     output = prelu(output)
-
-    output = output + skip_input
-    output = conv3D(output, features,stride=1,kernel=3,name=name + "_conv3D")
-    output = batch_norm(output, features, phase_train=phase_train)
+    if concatenation:
+        output = tf.concat([output, skip_input], axis=4)
+    else:
+        output = output + skip_input
+    output = conv3D(output, features_input,stride=1,kernel=3,name=name + "_conv3D")
+    output = batch_norm(output, features_input, phase_train=phase_train)
     output = prelu(output)
 
     return output
