@@ -192,3 +192,15 @@ plt.show()
 
 #he = Patient(25)
 #print(he.dirs)"""
+
+
+#prikaze eno 3d sliko
+def display_numpy(picture):
+    fig = plt.figure()
+    for num,slice in enumerate(picture):
+        if num>=30:
+            break
+        y = fig.add_subplot(5,6,num+1)
+        y.imshow(picture[num*3], cmap='gray')
+    plt.show()
+    return
