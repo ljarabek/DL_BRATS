@@ -34,6 +34,15 @@ Ar = conv3D(Ar, 8, 1, 3, name = "preUnet")
 Ar = batch_norm(Ar, 8, phase_train)
 Ar = prelu(Ar, 0.2)
 
+"""Ar = Ar[:,:,:,:,0]
+print("arshape: {}".format(Ar.shape))
+Ar = tf.reshape(Ar, shape = (128*160*144,1))#shape= (1, 128*2, 160*2, 144*2))
+Ar = Ar * tf.ones([1,8])
+Ar = tf.reshape(Ar, shape= (1, 128*2 ,160*2,  2*144,1))"""
+
+Ar = interpolation(Ar,output_shape=[1, 256, 320, 288, 8], name="fuck_it")
+
+
 """U-NET"""
 """contr1 = contractingBlock(Ar,phase_train,8,name="contr_1")
 contr2 = contractingBlock(contr1, phase_train, 16, name="contr_2")
@@ -48,15 +57,15 @@ exp3 = expandingBlock(exp2, Ar, phase_train, 16, name="exp_3")"""
 #interp1 = interpolation(Ar)
 
 
-Ar = interpolation(Ar)
+#Ar = interpolation(Ar)
 
 
 
 
 
 
-#output =  tf.transpose(Ar, [0,4,1,2,3])
-output = tf.transpose(Ar, [0, 1, 6, 2, 5, 3, 4])
+output =  tf.transpose(Ar, [0,4,1,2,3])
+#output = tf.transpose(Ar, [0, 1, 6, 2, 5, 3, 4])
 
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
@@ -65,8 +74,8 @@ with tf.Session() as sess:
     #print(_input.shape)
     #sha = sess.run(output, feed_dict={A:_input, B: _answer[0:4]})
     display_numpy(_input[0, 2, :, :, :])
-    #display_numpy(otpt[0, 2, :, :, :])
-    display_numpy(otpt[0,:,0,:,0,:,0])
+    display_numpy(otpt[0, 0, :, :, :])
+    #display_numpy(otpt[0,:,0,:,0,:,0])
     plt.show()
 
 #plt.imshow(sha[3][64])

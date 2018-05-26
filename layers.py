@@ -78,13 +78,37 @@ def deconv3D(input, features, stride = 2,kernel = 3, name=None):
                                       kernel_regularizer=l2_regularizer(l2_regularization), trainable=True,
                                       name="deconv3d_" + name)
 
-def DONTUSETHIS(input, features, stride = 2,kernel = 3, name=None):
-    return tf.layers.conv3d_transpose(inputs=input, filters=features, kernel_size=[kernel,kernel,kernel],
-                                      strides=[stride,stride,stride], padding="same",
-                                      kernel_initializer=tf.constant_initializer(1.0),
-                                      use_bias = False,
-                                      kernel_regularizer=l2_regularizer(l2_regularization), trainable=True,
-                                      name="deconv3d_" + name)
+def interpolation(input, output_shape, name=None):
+    """
+    :param input: data
+    :param output_shape: [batch x*2 y*2 z*2 channels]
+    :param name: name
+    :return: interpolated matrix (double the size)
+    """
+    A= tf.constant(value=[[[0.125, 0.25, 0.125],     [0.25, 0.5, 0.25],     [0.125, 0.25, 0.125]],
+                          [[0.25 , 0.5 , 0.25],      [0.50, 1.00, 0.50],    [0.25, 0.5, 0.25]],
+                          [[0.125, 0.25, 0.125],     [0.25, 0.5, 0.25],     [0.125, 0.25, 0.125]]],
+                   name = "interp_kernel_"+name)
+    A = tf.expand_dims(A, axis = 3)
+    #print(tf.shape(A))
+    A = tf.expand_dims(A, axis=4)
+
+    A_ = tf.constant(value=[[[0.125, 0.25, 0.125], [0.25, 0.5, 0.25], [0.125, 0.25, 0.125]],
+                           [[0.25, 0.5, 0.25], [0.50, 1.00, 0.50], [0.25, 0.5, 0.25]],
+                           [[0.125, 0.25, 0.125], [0.25, 0.5, 0.25], [0.125, 0.25, 0.125]]],
+                    name="interp_ke_" + name)
+    A_ = tf.expand_dims(A_, axis=3)
+    # print(tf.shape(A))
+    A_ = tf.expand_dims(A_, axis=4)
+
+    #print(tf.shape(A))
+    print(input.get_shape())
+    b, x, y, z, ch= output_shape
+    for i in range(int(ch/2)-1):
+        A = tf.concat([A, A], axis = 3)
+        A = tf.concat([A, A], axis=4)
+    print("A + {}".format(A.get_shape()))
+    return tf.nn.conv3d_transpose(input, filter=A,output_shape = output_shape,strides=[1,2,2,2,1], padding= "SAME", name =  "interp_"+name)
 def prelu(input, alphax = 0.2):
     alpha = tf.Variable(alphax, True)
     return tf.nn.leaky_relu(input, alpha=alpha)
@@ -113,7 +137,7 @@ def expandingBlock(input, skip_input,phase_train, features_input, name = "expand
 
     return output
 
-def interpolation(data):
+"""def interpolation(data):
     sh = data.shape
     n = int(sh[4])
     width, height, depth = int(sh[1]), int(sh[2]), int(sh[3])
@@ -138,7 +162,7 @@ def interpolation(data):
 
     # then finally reorder and you are done
     #return expand_it_all # tf.transpose(expand_it_all, [0, 2, 3, 4, 1])
-    return prepare_for_transpose
+    return prepare_for_transpose"""
 
 
 
