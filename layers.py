@@ -93,13 +93,6 @@ def interpolation(input, output_shape, name=None):
     #print(tf.shape(A))
     A = tf.expand_dims(A, axis=4)
 
-    A_ = tf.constant(value=[[[0.125, 0.25, 0.125], [0.25, 0.5, 0.25], [0.125, 0.25, 0.125]],
-                           [[0.25, 0.5, 0.25], [0.50, 1.00, 0.50], [0.25, 0.5, 0.25]],
-                           [[0.125, 0.25, 0.125], [0.25, 0.5, 0.25], [0.125, 0.25, 0.125]]],
-                    name="interp_ke_" + name)
-    A_ = tf.expand_dims(A_, axis=3)
-    # print(tf.shape(A))
-    A_ = tf.expand_dims(A_, axis=4)
 
     #print(tf.shape(A))
     print(input.get_shape())
