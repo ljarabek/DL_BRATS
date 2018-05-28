@@ -40,8 +40,8 @@ Ar = tf.reshape(Ar, shape = (128*160*144,1))#shape= (1, 128*2, 160*2, 144*2))
 Ar = Ar * tf.ones([1,8])
 Ar = tf.reshape(Ar, shape= (1, 128*2 ,160*2,  2*144,1))"""
 
-Ar = interpolation(Ar,output_shape=[1, 256, 320, 288, 8], name="fuck_it")
-
+#Ar = interpolation(Ar,output_shape=[1, 256, 320, 288, 8], name="fuck_it")
+Ar = contractingBlock(Ar,phase_train,8,name="contr_1")
 
 """U-NET"""
 """contr1 = contractingBlock(Ar,phase_train,8,name="contr_1")
