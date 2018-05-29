@@ -78,7 +78,7 @@ def deconv3D(input, features, stride = 2,kernel = 3, name=None):
                                       kernel_regularizer=l2_regularizer(l2_regularization), trainable=True,
                                       name="deconv3d_" + name)
 
-def interpolation(input, output_shape, name=None):
+def interpolation(input,  name="interp_2x", no_filters = 5): #output_shape,
     """
     :param input: data
     :param output_shape: [batch x*2 y*2 z*2 channels]
@@ -92,16 +92,34 @@ def interpolation(input, output_shape, name=None):
     A = tf.expand_dims(A, axis = 3)
     #print(tf.shape(A))
     A = tf.expand_dims(A, axis=4)
-
-
+    fil= tf.concat([A, A], axis = 3,name="conc5")
+    buffer = tf.concat([A,A], axis=3,name="conc4")
+    #B = tf.concat([B, A], axis=4)
+    for i in range(no_filters-2):
+        fil = tf.concat([fil,A], axis=3, name="conc")
+        buffer = tf.concat([buffer, A], axis=3,name="conc1")
+        #B = tf.concat([B, A], axis=4)
+    for i in range(no_filters-1):
+        fil = tf.concat([fil, buffer], axis = 4,name="conc2")
+    #A = tf.stack([A, A, A, A, A], axis=3)
+    #A = tf.stack([A, A, A, A, A], axis=4)
     #print(tf.shape(A))
-    print(input.get_shape())
-    b, x, y, z, ch= output_shape
-    for i in range(int(ch/2)-1):
-        A = tf.concat([A, A], axis = 3)
-        A = tf.concat([A, A], axis=4)
-    print("A + {}".format(A.get_shape()))
-    return tf.nn.conv3d_transpose(input, filter=A,output_shape = output_shape,strides=[1,2,2,2,1], padding= "SAME", name =  "interp_"+name)
+
+    b_, x_, y_, z_, ch_ = list(input.get_shape())
+    x_ *=2
+    y_ *=2
+    z_ *=2
+    #print("channels for interp: "+ str(x_))
+    #b, x, y, z, ch= output_shape
+
+    #for i in range(int(int(ch_)/2)):
+    #B = tf.concat([A, A], axis = 3)
+    #B = tf.concat([A, A], axis=4)
+    #print("A + {}".format(A.get_shape()))
+    output_shape = tf.constant([b_,x_,y_,z_,ch_], dtype= tf.int32)
+    #output_shape = tf.convert_to_tensor(output_shape)
+
+    return tf.nn.conv3d_transpose(input, filter=fil,output_shape = output_shape,strides=[1,2,2,2,1], padding= "SAME", name =  "interp_"+name)
 def prelu(input, alphax = 0.2):
     alpha = tf.Variable(alphax, True)
     return tf.nn.leaky_relu(input, alpha=alpha)
@@ -175,7 +193,7 @@ def interpolationxxx(data, scale = 2):
     #new_size = tf.constant( [sh[2], sh[3]] * scale)
     sh2 = sh[2]*2
     sh3 = sh[3]*2
-    print(sh2, sh3)
+    #print(sh2, sh3)
     resized = tf.image.resize_images(reshaped, (sh2, sh3))
 
     # your data is now [5*10,100,100,256]

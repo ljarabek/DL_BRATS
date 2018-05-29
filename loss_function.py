@@ -38,3 +38,30 @@ def jaccard2(P, T):
 
     return normPT/(normP**2 + normT**2 - normPT)
 
+
+def jaccard_coef_logloss(labels, predictions, smooth=1e-10):
+    """ Loss function based on jaccard coefficient.
+
+    Parameters
+    ----------
+    labels : tf.Tensor
+        tensor containing target mask.
+    predictions : tf.Tensor
+        tensor containing predicted mask.
+    smooth : float
+        small real value used for avoiding division by zero error.
+
+    Returns
+    -------
+    tf.Tensor
+        tensor containing negative logarithm of jaccard coefficient.
+    """
+    labels = tf.contrib.layers.flatten(labels)
+    predictions = tf.contrib.layers.flatten(predictions)
+    truepos = tf.reduce_sum(labels * predictions)
+    falsepos = tf.reduce_sum(predictions) - truepos
+    falseneg = tf.reduce_sum(labels) - truepos
+    jaccard = tf.divide((truepos + smooth) , (smooth + truepos + falseneg + falsepos))
+    #return -tf.log(jaccard + smooth)
+    return 1 - jaccard
+

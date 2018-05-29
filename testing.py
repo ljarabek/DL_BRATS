@@ -84,7 +84,7 @@ def getBatchTraining():     #  Zanekrat je ozadje 0  -da ne vpliva na gradient
 
     data = np.ma.masked_array(arr).filled(0)
 
-    return data, answers
+    return np.expand_dims(data,0), np.expand_dims(answers,0)
 
 #print(getN(2))
 #print(getN(1))
@@ -101,7 +101,7 @@ def outputToChannels(id):
 
 input, output = getBatchTraining()
 
-
+print(output.shape)
 #plt.imshow(getBatch()[0][64])
 #plt.show()
 
@@ -197,10 +197,11 @@ plt.show()
 #prikaze eno 3d sliko
 def display_numpy(picture):
     fig = plt.figure()
+    iter = int(len(picture) /30)
     for num,slice in enumerate(picture):
         if num>=30:
             break
         y = fig.add_subplot(5,6,num+1)
-        y.imshow(picture[num*3], cmap='gray')
+        y.imshow(picture[num*iter], cmap='gray')
     plt.show()
     return
