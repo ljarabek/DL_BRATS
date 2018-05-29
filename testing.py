@@ -202,10 +202,7 @@ def display_numpy(picture):
         if num>=30:
             break
         y = fig.add_subplot(5,6,num+1)
-<<<<<<< HEAD
+
         y.imshow(picture[num*iter], cmap='gray')
-=======
-        y.imshow(picture[num*2], cmap='rainbow')
->>>>>>> 9e675fddef1e6d792d4d5c6d4f2cd61c8275b757
     plt.show()
     return
