@@ -78,7 +78,7 @@ def deconv3D(input, features, stride = 2,kernel = 3, name=None):
                                       kernel_regularizer=l2_regularizer(l2_regularization), trainable=True,
                                       name="deconv3d_" + name)
 
-def interpolation(input,  name="interp_2x", no_filters = 5): #output_shape,
+def interpolation(input,  name="interp_2x", no_filters = 4): #output_shape,
     """
     :param input: data
     :param output_shape: [batch x*2 y*2 z*2 channels]
