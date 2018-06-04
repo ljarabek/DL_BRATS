@@ -97,14 +97,9 @@ def outputToChannels(id):
     flat = arr.flatten()
     buffer[flat, np.arange(arr.size)] = 1
     [x,y,z] = arr.shape
-    return np.reshape(buffer, newshape=(5,x,y,z))
+    return np.reshape(buffer, newshape=(5,x,y,z))[1:]
 
 input, output = getBatchTraining()
-
-print(output.shape)
-#plt.imshow(getBatch()[0][64])
-#plt.show()
-
 
 
 """def getBatch(size = 15, min= 0, max = 146):              BATCH SIZE je 1!!!
@@ -206,3 +201,8 @@ def display_numpy(picture):
         y.imshow(picture[num*iter], cmap='gray')
     plt.show()
     return
+
+"""display_numpy(outputToChannels(10)[0])
+display_numpy(outputToChannels(10)[1])
+display_numpy(outputToChannels(10)[2])
+display_numpy(outputToChannels(10)[3])"""

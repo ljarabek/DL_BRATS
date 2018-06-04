@@ -54,12 +54,12 @@ exp2 = expandingBlock(exp1, contr1, phase_train, 32, name="exp_2")
 exp3 = expandingBlock(exp2, Ar, phase_train, 16, name="exp_3")
 
 """TISTO ZRAVEN:"""
-out1 = conv3D(exp1, 5, 1, 1, name="1x1x1_conv_1")
+out1 = conv3D(exp1, 4, 1, 1, name="1x1x1_conv_1")
 out1 = interpolation(out1)
-out2 = conv3D(exp2, 5, 1, 1, name="1x1x1_conv_2")
+out2 = conv3D(exp2, 4, 1, 1, name="1x1x1_conv_2")
 out2 = out2+out1
 out2 = interpolation(out2)
-out3 = conv3D(exp3, 5, 1, 1, name="1x1x1_conv_3")
+out3 = conv3D(exp3, 4, 1, 1, name="1x1x1_conv_3")
 out3 = out3 + out2
 out3 = tf.nn.softmax(out3, dim=-1, name="softmax" )
 #Ar = interpolation(Ar)
@@ -84,7 +84,7 @@ train = tf.train.AdamOptimizer(learning_rate=0.003).minimize(loss)
 
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
-    for i in range(15):
+    for i in range(1):
         _input, _answer = getBatchTraining()
         otpt, loss_, _ = sess.run([output, loss, train], feed_dict={input:_input, phase_train:True, answer: _answer})
         if i%5==0:
