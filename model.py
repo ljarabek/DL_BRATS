@@ -84,11 +84,15 @@ train = tf.train.AdamOptimizer(learning_rate=0.003).minimize(loss)
 
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
-    for i in range(5):
+    for i in range(15):
         _input, _answer = getBatchTraining()
         otpt, loss_, _ = sess.run([output, loss, train], feed_dict={input:_input, phase_train:True, answer: _answer})
+        if i%5==0:
+            display_numpy(_input[0, 2, :, :, :])
+            display_numpy(otpt[0, 0, :, :, :])
+            display_numpy(_answer[0, 0, :, :, :])
         print(loss_)
-    print(otpt.shape)
+    #print(otpt.shape)
     print(loss_)
     #print(_input.shape)
     #sha = sess.run(output, feed_dict={A:_input, B: _answer[0:4]})
