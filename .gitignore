@@ -4,3 +4,4 @@ __pycache__/
 *.xml
 *.xml
 .idea/workspace.xml
+config.ini
