@@ -62,6 +62,6 @@ def jaccard_coef_logloss(labels, predictions, smooth=1e-10):
     falsepos = tf.reduce_sum(predictions) - truepos
     falseneg = tf.reduce_sum(labels) - truepos
     jaccard = tf.divide((truepos + smooth) , (smooth + truepos + falseneg + falsepos))
-    #return -tf.log(jaccard + smooth)
-    return 1 - jaccard
+    return -tf.log(jaccard + smooth)
+    #return 1 - jaccard
 

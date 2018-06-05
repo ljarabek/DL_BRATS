@@ -34,7 +34,7 @@ def batch_norm(x, n_out, phase_train):
         gamma = tf.Variable(tf.constant(1.0, shape=[n_out]),
                                       name='gamma', trainable=True)
         batch_mean, batch_var = tf.nn.moments(x, [0,1,2], name='moments')
-        ema = tf.train.ExponentialMovingAverage(decay=0.9) #prej je blo 0.5
+        ema = tf.train.ExponentialMovingAverage(decay=0.5) #prej je blo 0.5
 
         def mean_var_with_update():
             ema_apply_op = ema.apply([batch_mean, batch_var])
@@ -56,17 +56,17 @@ def conv3D(input, features, stride = 1,kernel = 3, name=None):
 
 
 def contractingBlock(input, phase_train, features_input, name = "_contrblock"):
-    features = int(2*features_input)
-    output_halved = conv3D(input, features, 2,3, name = name + "_conv/2")
-    output1 = batch_norm(output_halved,features,phase_train=phase_train)
+    with tf.variable_scope(name):
+        features = int(2*features_input)
+        output_halved = conv3D(input, features, 2,3, name = name + "_conv/2")
+        output1 = batch_norm(output_halved,features,phase_train=phase_train)
 
-    output1 = prelu(output1)
-    output1 = batch_norm(output1, features, phase_train=phase_train)
-    output_block = output1+output_halved
-    output_block = batch_norm(output_block,features,phase_train=phase_train)
+        output1 = prelu(output1)
+        output1 = batch_norm(output1, features, phase_train=phase_train)
+        output_block = output1+output_halved
+        output_block = batch_norm(output_block,features,phase_train=phase_train)
 
-    output_block = prelu(output_block)
-
+        output_block = prelu(output_block)
     return output_block
 
 
@@ -85,39 +85,40 @@ def interpolation(input,  name="interp_2x", no_filters = 4): #output_shape,
     :param name: name
     :return: interpolated matrix (double the size)
     """
-    A= tf.constant(value=[[[0.125, 0.25, 0.125],     [0.25, 0.5, 0.25],     [0.125, 0.25, 0.125]],
-                          [[0.25 , 0.5 , 0.25],      [0.50, 1.00, 0.50],    [0.25, 0.5, 0.25]],
-                          [[0.125, 0.25, 0.125],     [0.25, 0.5, 0.25],     [0.125, 0.25, 0.125]]],
-                   name = "interp_kernel_"+name)
-    A = tf.expand_dims(A, axis = 3)
-    #print(tf.shape(A))
-    A = tf.expand_dims(A, axis=4)
-    fil= tf.concat([A, A], axis = 3,name="conc5")
-    buffer = tf.concat([A,A], axis=3,name="conc4")
-    #B = tf.concat([B, A], axis=4)
-    for i in range(no_filters-2):
-        fil = tf.concat([fil,A], axis=3, name="conc")
-        buffer = tf.concat([buffer, A], axis=3,name="conc1")
+    with tf.variable_scope(name):
+        A= tf.constant(value=[[[0.125, 0.25, 0.125],     [0.25, 0.5, 0.25],     [0.125, 0.25, 0.125]],
+                              [[0.25 , 0.5 , 0.25],      [0.50, 1.00, 0.50],    [0.25, 0.5, 0.25]],
+                              [[0.125, 0.25, 0.125],     [0.25, 0.5, 0.25],     [0.125, 0.25, 0.125]]],
+                       name = "interp_kernel_"+name)
+        A = tf.expand_dims(A, axis = 3)
+        #print(tf.shape(A))
+        A = tf.expand_dims(A, axis=4)
+        fil= tf.concat([A, A], axis = 3,name="conc5")
+        buffer = tf.concat([A,A], axis=3,name="conc4")
         #B = tf.concat([B, A], axis=4)
-    for i in range(no_filters-1):
-        fil = tf.concat([fil, buffer], axis = 4,name="conc2")
-    #A = tf.stack([A, A, A, A, A], axis=3)
-    #A = tf.stack([A, A, A, A, A], axis=4)
-    #print(tf.shape(A))
+        for i in range(no_filters-2):
+            fil = tf.concat([fil,A], axis=3, name="conc")
+            buffer = tf.concat([buffer, A], axis=3,name="conc1")
+            #B = tf.concat([B, A], axis=4)
+        for i in range(no_filters-1):
+            fil = tf.concat([fil, buffer], axis = 4,name="conc2")
+        #A = tf.stack([A, A, A, A, A], axis=3)
+        #A = tf.stack([A, A, A, A, A], axis=4)
+        #print(tf.shape(A))
 
-    b_, x_, y_, z_, ch_ = list(input.get_shape())
-    x_ *=2
-    y_ *=2
-    z_ *=2
-    #print("channels for interp: "+ str(x_))
-    #b, x, y, z, ch= output_shape
+        b_, x_, y_, z_, ch_ = list(input.get_shape())
+        x_ *=2
+        y_ *=2
+        z_ *=2
+        #print("channels for interp: "+ str(x_))
+        #b, x, y, z, ch= output_shape
 
-    #for i in range(int(int(ch_)/2)):
-    #B = tf.concat([A, A], axis = 3)
-    #B = tf.concat([A, A], axis=4)
-    #print("A + {}".format(A.get_shape()))
-    output_shape = tf.constant([b_,x_,y_,z_,ch_], dtype= tf.int32)
-    #output_shape = tf.convert_to_tensor(output_shape)
+        #for i in range(int(int(ch_)/2)):
+        #B = tf.concat([A, A], axis = 3)
+        #B = tf.concat([A, A], axis=4)
+        #print("A + {}".format(A.get_shape()))
+        output_shape = tf.constant([b_,x_,y_,z_,ch_], dtype= tf.int32)
+        #output_shape = tf.convert_to_tensor(output_shape)
 
     return tf.nn.conv3d_transpose(input, filter=fil,output_shape = output_shape,strides=[1,2,2,2,1], padding= "SAME", name =  "interp_"+name)
 def prelu(input, alphax = 0.2):
@@ -126,25 +127,25 @@ def prelu(input, alphax = 0.2):
 
 def expandingBlock(input, skip_input,phase_train, features_input, name = "expand_block", concat_inputs = False,
                    concatenation = False):
+    with tf.variable_scope(name):
+        if concat_inputs:
+            features = int(features_input/4)
+        else:
+            features = int(features_input/2)
+        output = conv3D(input,features=features, stride=1, kernel=1,name=name + "_1x1x1conv")
+        output = batch_norm(output, features,phase_train=phase_train)
 
-    if concat_inputs:
-        features = int(features_input/4)
-    else:
-        features = int(features_input/2)
-    output = conv3D(input,features=features, stride=1, kernel=1,name=name + "_1x1x1conv")
-    output = batch_norm(output, features,phase_train=phase_train)
-
-    output = prelu(output)
-    output= deconv3D(output, features,stride=2, kernel=3, name=name + "_deconv")
-    output = batch_norm(output, features, phase_train=phase_train)
-    output = prelu(output)
-    if concatenation:
-        output = tf.concat([output, skip_input], axis=4)
-    else:
-        output = output + skip_input
-    output = conv3D(output, features_input,stride=1,kernel=3,name=name + "_conv3D")
-    output = batch_norm(output, features_input, phase_train=phase_train)
-    output = prelu(output)
+        output = prelu(output)
+        output= deconv3D(output, features,stride=2, kernel=3, name=name + "_deconv")
+        output = batch_norm(output, features, phase_train=phase_train)
+        output = prelu(output)
+        if concatenation:
+            output = tf.concat([output, skip_input], axis=4)
+        else:
+            output = output + skip_input
+        output = conv3D(output, features_input,stride=1,kernel=3,name=name + "_conv3D")
+        output = batch_norm(output, features_input, phase_train=phase_train)
+        output = prelu(output)
 
     return output
 

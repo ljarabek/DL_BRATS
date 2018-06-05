@@ -97,7 +97,7 @@ def outputToChannels(id):
     flat = arr.flatten()
     buffer[flat, np.arange(arr.size)] = 1
     [x,y,z] = arr.shape
-    return np.reshape(buffer, newshape=(5,x,y,z))[1:]
+    return np.reshape(buffer, newshape=(5,x,y,z)) # [1:]
 
 input, output = getBatchTraining()
 
@@ -200,6 +200,24 @@ def display_numpy(picture):
 
         y.imshow(picture[num*iter], cmap='gray')
     plt.show()
+    return
+
+def save_numpy(picture, batch, dir='C:/activations/', filename = "/graph.png"):
+    if not os.path.exists(dir):
+        os.makedirs(dir + '{}'.format(batch))
+    #dct = dictionary.get()
+    savedir = dir + '{}/'.format(batch)
+    fig = plt.figure()
+    iter = int(len(picture) /30)
+    for num,slice in enumerate(picture):
+        if num>=30:
+            break
+        y = fig.add_subplot(5,6,num+1)
+
+        y.imshow(picture[num*iter], cmap='gray')
+    plt.savefig(dir + str(batch)+filename, dpi=500, format = "png")
+    plt.close('all')
+    #plt.show()
     return
 
 """display_numpy(outputToChannels(10)[0])
