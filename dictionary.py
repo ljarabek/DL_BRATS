@@ -1,26 +1,55 @@
 import os
 from configparser import ConfigParser
-from pprint import pprint
-import SimpleITK as sitk
-import matplotlib.pyplot as plt
 import re
-import numpy as np
-config = ConfigParser()
-config.read("config.ini")
-default_config = config['DEFAULT']
-train_path = default_config['train_path']
-arr = []
-ids = []
-for root, dirs, files in os. walk(train_path):
-    for file in [f for f in files if f.endswith(".mha")]:
-        s = str(root + '/' + file)
-        arr.append(s)
-        pat_id = re.sub(r'(pat)', '', re.findall(r'(pat[0-9]+)', s)[0])
-        ids.append(int(pat_id))
-dictionary = {}
-for idx, id in enumerate(arr, 0):
-    if idx%5==0:
-        dictionary.update({ids[idx] : arr[idx:idx+5]})
+from glob import glob
+
+
+##training dictionary
+train_path = 'C:\\BRATS\\BRATS2015_Training\\HGG'
+
+def ending(fileList, end = ".mha"):
+    "Funkcija  prejme seznam datotek in vrne seeznam datotek, ki se koncajo na dano končnico"
+    newList = []
+    for file in fileList:
+        if file.endswith(end):
+            newList.append(file)
+
+    return newList
+
+
+#ta funkcija je nepotrebna, zato ker se taki ID-ji ponavljajo
+#zato slovar ne shrani vseh pacientov
+def getID(file):
+    "Vrne ID stevilko pacienta iz imena njegove datoteke"
+    id = re.search("pat0*([0-9]*)_.*", file).group(1) #string potrebno se pretvoriti v integer
+    return id
+
+
+def getDictionary(train_path):
+    "Vrne slovar, kjer so ključi ID pacientov vrednosti pa absoltune poti datotek Flair,T1,T1c,T2, answer"
+    os.chdir(train_path)
+
+    dictionary ={}
+    id = 1
+    for file in os.listdir():
+
+        absolutPath = train_path + "\\" + file
+
+        #seznam vseh končnih map
+        endFiles = glob(absolutPath + "\\*\\*")
+
+        #izberemo samo datoteke, ki  se končajo na .mha
+        endFiles = ending(endFiles)
+
+        #shranimo v slovar
+        dictionary[id] = endFiles
+        id += 1
+
+    return dictionary
+
+#naredimo slovar
+dictionary = getDictionary(train_path)
+
 def get():
     return dictionary
 

@@ -4,22 +4,21 @@ import matplotlib.pyplot as plt
 import numpy as np
 import numpy.ma as ma
 import random as rand
-from tqdm import tqdm
-from patient import Patient
 import os
 
 if not os.path.exists('./preprocess/'):
     os.makedirs('./preprocess/')
-dct = dictionary.get() #vse je dolgo 188
-#sitk.Show(sitk.ReadImage(dct[5][2]))
+
+#dictionary of patients (keys: patient ids, values: image paths)
+dct = dictionary.get() #length = 188
 
 
 def getMaskedArray(i, mod):
-    '''returns un-cropped array'''
+    '''returns cropped array, where values 0 are masked'''
     arr = sitk.GetArrayFromImage(sitk.ReadImage(dct[i][mod]))[77 - 64:77 + 64, 128 - 80:128 + 80, 120 - 72:120 + 72]
     return ma.masked_values(arr,0)
-###     STEVILO VREDNOSTI
 
+#calculating the average value and standard deviation
 def getAvg(modality = 0):
     try:
         avg = np.load('./preprocess/avg{}.npy'.format(modality))
@@ -55,8 +54,6 @@ def getStd(modality = 0):
     np.save('./preprocess/std{}.npy'.format(modality), std)
     return(std)
 
-
-
 """print('flair')
 print(getAvg(0))
 print(getStd(0))
@@ -70,8 +67,10 @@ print('t2')
 print(getAvg(3))
 print(getStd(3))"""
 
+
 def standardize(arr, mod):
     return (arr-getAvg(mod))/(getStd(mod) + 0.000000001)
+
 
 def getBatchTraining():     #  Zanekrat je ozadje 0  -da ne vpliva na gradient
                     #  Lahko spremeniš z tem, da daš filled v standardize
@@ -88,6 +87,7 @@ def getBatchTraining():     #  Zanekrat je ozadje 0  -da ne vpliva na gradient
 
 #print(getN(2))
 #print(getN(1))
+
 def outputToChannels(id):
     """ ta koda je sexy """
     arr = np.array(sitk.GetArrayFromImage(sitk.ReadImage(dct[id][4])))[77 - 64:77 + 64, 128 - 80:128 + 80, 120 - 72:120 + 72]
@@ -98,6 +98,24 @@ def outputToChannels(id):
     buffer[flat, np.arange(arr.size)] = 1
     [x,y,z] = arr.shape
     return np.reshape(buffer, newshape=(5,x,y,z)) # [1:]
+
+def outputToChannelsTest(id):
+    arr = np.array(sitk.GetArrayFromImage(sitk.ReadImage(dct[id][4])))[77 - 64:77 + 64, 128 - 80:128 + 80, 120 - 72:120 + 72]
+    type0 = np.zeros(arr.shape)
+    type0[arr==0] = 1
+    type1 = np.zeros(arr.shape)
+    type1[arr == 1] = 1
+
+    type2 = np.zeros(arr.shape)
+    type2[arr==2]=1
+
+    type3 = np.zeros(arr.shape)
+    type3[arr == 3] = 1
+
+    type4 = np.zeros(arr.shape)
+    type4[arr == 4]=1
+
+    return np.stack((type0,type1,type2,type3,type4))
 
 input, output = getBatchTraining()
 
@@ -189,7 +207,7 @@ plt.show()
 #print(he.dirs)"""
 
 
-#prikaze eno 3d sliko
+#displays a 3D picture
 def display_numpy(picture):
     fig = plt.figure()
     iter = int(len(picture) /30)
