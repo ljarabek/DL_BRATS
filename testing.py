@@ -10,8 +10,11 @@ if not os.path.exists('./preprocess/'):
     os.makedirs('./preprocess/')
 
 #dictionary of patients (keys: patient ids, values: image paths)
-dct = dictionary.get() #length = 188
+#training dictionary
+dct = dictionary.get() #length = 274
 
+#test dictionary
+dctTest = dictionary.getTrainig() #length = 110
 
 def getMaskedArray(i, mod):
     '''returns cropped array, where values 0 are masked'''
@@ -85,6 +88,7 @@ def getBatchTraining():     #  Zanekrat je ozadje 0  -da ne vpliva na gradient
 
     return np.expand_dims(data,0), np.expand_dims(answers,0)
 
+
 #print(getN(2))
 #print(getN(1))
 
@@ -101,8 +105,10 @@ def outputToChannels(id):
 
 def outputToChannelsTest(id):
     arr = np.array(sitk.GetArrayFromImage(sitk.ReadImage(dct[id][4])))[77 - 64:77 + 64, 128 - 80:128 + 80, 120 - 72:120 + 72]
+
     type0 = np.zeros(arr.shape)
     type0[arr==0] = 1
+
     type1 = np.zeros(arr.shape)
     type1[arr == 1] = 1
 
@@ -219,6 +225,7 @@ def display_numpy(picture):
         y.imshow(picture[num*iter], cmap='gray')
     plt.show()
     return
+
 
 def save_numpy(picture, batch, dir='C:/activations/', filename = "/graph.png"):
     if not os.path.exists(dir):

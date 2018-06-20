@@ -1,14 +1,9 @@
 import os
-from configparser import ConfigParser
 import re
 from glob import glob
 
-
-##training dictionary
-train_path = 'C:\\BRATS\\BRATS2015_Training\\HGG'
-
 def ending(fileList, end = ".mha"):
-    "Funkcija  prejme seznam datotek in vrne seeznam datotek, ki se koncajo na dano končnico"
+    "Funkcija  prejme seznam datotek in vrne seznam datotek, ki se koncajo na dano končnico end"
     newList = []
     for file in fileList:
         if file.endswith(end):
@@ -24,35 +19,67 @@ def getID(file):
     id = re.search("pat0*([0-9]*)_.*", file).group(1) #string potrebno se pretvoriti v integer
     return id
 
+#naredimo slovar za trening slike
+##training dictionary
 
-def getDictionary(train_path):
-    "Vrne slovar, kjer so ključi ID pacientov vrednosti pa absoltune poti datotek Flair,T1,T1c,T2, answer"
-    os.chdir(train_path)
+train_path1 = 'C:\\BRATS\\BRATS2015_Training\\HGG'
+train_path2 = 'C:\\BRATS\\BRATS2015_Training\\LGG'
 
-    dictionary ={}
-    id = 1
-    for file in os.listdir():
+#Nareidmo slovar, kjer so ključi zaporedna stevilka pacienta vrednosti pa absoltune poti datotek Flair,T1,T1c,T2, answer"
+trainingDictionary ={}
+id = 1
 
-        absolutPath = train_path + "\\" + file
+#najprej poberemo slike iz HGG
+os.chdir(train_path1)
 
-        #seznam vseh končnih map
-        endFiles = glob(absolutPath + "\\*\\*")
+for file in os.listdir():
+ absolutPath = train_path1 + "\\" + file
 
-        #izberemo samo datoteke, ki  se končajo na .mha
-        endFiles = ending(endFiles)
+ #seznam vseh končnih map
+ endFiles = glob(absolutPath + "\\*\\*")
+ #izberemo samo datoteke, ki  se končajo na .mha
+ endFiles = ending(endFiles)
+ #shranimo v slovar
+ trainingDictionary[id] = endFiles
+ id += 1
 
-        #shranimo v slovar
-        dictionary[id] = endFiles
-        id += 1
 
-    return dictionary
+# nato poberemo slike iz LGG
+os.chdir(train_path2)
 
-#naredimo slovar
-dictionary = getDictionary(train_path)
+for file in os.listdir():
+    absolutPath = train_path2 + "\\" + file
+    # seznam vseh končnih map
+    endFiles = glob(absolutPath + "\\*\\*")
+    # izberemo samo datoteke, ki  se končajo na .mha
+    endFiles = ending(endFiles)
+    # shranimo v slovar
+    trainingDictionary[id] = endFiles
+    id += 1
 
+#naredimo še slovar s test slikami
+test_path = "C:\BRATS\Testing\HGG_LGG"
+os.chdir(test_path)
+
+testDictionary = {}
+
+for file in os.listdir():
+    absolutPath = test_path + "\\" + file
+    # seznam vseh končnih map
+    endFiles = glob(absolutPath + "\\*\\*")
+    # izberemo samo datoteke, ki  se končajo na .mha
+    endFiles = ending(endFiles)
+    # shranimo v slovar
+    testDictionary[id] = endFiles
+    id += 1
+
+#vrne slovar slik za učiti
 def get():
-    return dictionary
+    return trainingDictionary
 
+#vrne slovar slik za testiranje natančnosti
+def getTrainig():
+    return testDictionary
 
 """
 k = sitk.GetArrayFromImage(sitk.ReadImage(arr[52])) #tole dela
