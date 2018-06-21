@@ -5,3 +5,4 @@ __pycache__/
 *.xml
 .idea/workspace.xml
 config.ini
+config.ini
