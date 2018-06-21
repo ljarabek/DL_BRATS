@@ -6,3 +6,4 @@ __pycache__/
 .idea/workspace.xml
 config.ini
 config.ini
+*.meta
