@@ -1,6 +1,6 @@
 import tensorflow as tf
 from tensorflow.contrib.layers import xavier_initializer, l2_regularizer
-from testing import *
+from preprocess import *
 import dictionary
 import SimpleITK as sitk
 import matplotlib.pyplot as plt
@@ -122,8 +122,9 @@ def interpolation(input,  name="interp_2x", no_filters = 4): #output_shape,
 
     return tf.nn.conv3d_transpose(input, filter=fil,output_shape = output_shape,strides=[1,2,2,2,1], padding= "SAME", name =  "interp_"+name)
 def prelu(input, alphax = 0.2):
-    alpha = tf.Variable(alphax, True)
-    return tf.nn.leaky_relu(input, alpha=alpha)
+    with tf.variable_scope("prelu"):
+        alpha = tf.Variable(alphax, True, name="alpha")
+        return tf.nn.leaky_relu(input, alpha=alpha)
 
 def expandingBlock(input, skip_input,phase_train, features_input, name = "expand_block", concat_inputs = False,
                    concatenation = False):

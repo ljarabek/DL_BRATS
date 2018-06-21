@@ -1,6 +1,6 @@
 import tensorflow as tf
 from tensorflow.contrib.layers import xavier_initializer, l2_regularizer
-from testing import *
+from trainingUtils import *
 import dictionary
 import SimpleITK as sitk
 import matplotlib.pyplot as plt
@@ -12,11 +12,13 @@ from patient import Patient
 import os
 from loss_function import *
 from layers import *
+from preprocess import *
 
 DCT = dictionary.get()
 print(len(DCT))
 seed = 42
 l2_regularization = 0.0
+checkpoint_dir = "./checkpoint"
 
 _input, _answer = getBatchTraining()
 #display_numpy(_answer[0, 0, :, :, :])
@@ -79,29 +81,50 @@ out3 = tf.nn.softmax(out3, dim=-1, name="softmax" )  # DEJMO TO PRESKOČIT, ČE 
 
 
 output =  tf.transpose(out3, [0,4,1,2,3])
-print(output.get_shape())
-print(answer.get_shape())
+
 #loss = jaccard_coef_logloss(output, answer)
 loss = jaccard_coef_logloss(output, answer)
+tf.summary.scalar("loss", loss)
 LR = tf.placeholder(tf.float32)
 train = tf.train.AdamOptimizer(learning_rate=LR).minimize(loss)
+
+for var in tf.trainable_variables():
+    tf.summary.histogram(var.name, var)
+
+
+
+
+merged = tf.summary.merge_all()
+
 #output = tf.transpose(Ar, [0, 1, 6, 2, 5, 3, 4])
 
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
     train_writer = tf.summary.FileWriter( 'C:/train/', sess.graph)
+    saver = tf.train.Saver()
+    ckpt = tf.train.get_checkpoint_state(checkpoint_dir=checkpoint_dir)
+    if ckpt and ckpt.model_checkpoint_path:
+        loader = tf.train.Saver()
+        load(loader, sess, ckpt.model_checkpoint_path)
+
     learning_rate = 0.006
     top_loss = 1e5
     for i in range(10):
         _input, _answer = getBatchTraining()
-        otpt, loss_, _ = sess.run([output, loss, train], feed_dict={input:_input, phase_train:True, answer: _answer, LR:learning_rate})
+        otpt, loss_, summary, _ = sess.run([output, loss, merged, train], feed_dict={input:_input, phase_train:True, answer: _answer, LR:learning_rate})
+        train_writer.add_summary(summary, i)
         if i%2500==0:
             learning_rate = learning_rate/2
         if i%100==0 and loss_ < top_loss:
             print("saving top results, loss: {}".format(loss_))
             top_loss=loss_
+            save(saver, sess, checkpoint_dir, i)
 
-            save_numpy(_input[0, 0, :, :, :], i, filename="in_flair.png")
+
+
+
+
+            """save_numpy(_input[0, 0, :, :, :], i, filename="in_flair.png")
             save_numpy(_input[0, 1, :, :, :], i, filename="in_t1.png")
             save_numpy(_input[0, 2, :, :, :], i, filename="in_t1c.png")
             save_numpy(_input[0, 3, :, :, :], i, filename="in_t2.png")
@@ -117,7 +140,7 @@ with tf.Session() as sess:
             save_numpy(_answer[0, 4, :, :, :], i, filename="answer_4.png")  # tle je bil anwer3.png!!! napaka!
             np.save("C:/activations/{}input.npy".format(i), _input)
             np.save("C:/activations/{}output.npy".format(i), otpt)
-            np.save("C:/activations/{}output.npy".format(i), _answer)
+            np.save("C:/activations/{}output.npy".format(i), _answer)"""
             #save_numpy(_answer[0, 4, :, :, :], i, filename="answer_4.png")
             #save_numpy(_answer[0, 5, :, :, :], i, filename="answer_3.png")
         print(loss_, learning_rate)

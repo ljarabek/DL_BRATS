@@ -5,6 +5,10 @@ import numpy as np
 import numpy.ma as ma
 import random as rand
 import os
+from presentation import multi_slice_viewer
+
+
+
 
 if not os.path.exists('./preprocess/'):
     os.makedirs('./preprocess/')
@@ -22,6 +26,11 @@ dctTest = dictionary.getTrainig() #length = 110
 def getMaskedArray(i, mod):
     '''returns cropped array, where values 0 are masked'''
     arr = sitk.GetArrayFromImage(sitk.ReadImage(dct[i][mod]))[77 - 64:77 + 64, 128 - 80:128 + 80, 120 - 72:120 + 72]
+    return ma.masked_values(arr,0)
+
+def getMaskedArrayTest(i, mod):
+    '''returns cropped array, where values 0 are masked'''
+    arr = sitk.GetArrayFromImage(sitk.ReadImage(dctTest[i][mod]))[77 - 64:77 + 64, 128 - 80:128 + 80, 120 - 72:120 + 72]
     return ma.masked_values(arr,0)
 
 #calculating the average value and standard deviation
@@ -95,14 +104,14 @@ def getBatchTest():
     key = rand.choice(list(dctTest))
     arr = []
     for i in range(4):
-        arr.append(standardize(getMaskedArray(key, mod=i),
+        arr.append(standardize(getMaskedArrayTest(key, mod=i),
                                i))
 
     data = np.ma.masked_array(arr).filled(0)
 
     return np.expand_dims(data, 0)
 
-
+#multi_slice_viewer(getBatchTest()[0,0])
 #print(getN(2))
 #print(getN(1))
 
