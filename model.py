@@ -92,7 +92,7 @@ with tf.Session() as sess:
     train_writer = tf.summary.FileWriter( 'C:/train/', sess.graph)
     learning_rate = 0.006
     top_loss = 1e5
-    for i in range(5000):
+    for i in range(10):
         _input, _answer = getBatchTraining()
         otpt, loss_, _ = sess.run([output, loss, train], feed_dict={input:_input, phase_train:True, answer: _answer, LR:learning_rate})
         if i%2500==0:
