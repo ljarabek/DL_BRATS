@@ -12,7 +12,7 @@ from patient import Patient
 import os
 from loss_function import *
 from layers import *
-from preprocess import *
+from preprocessing import *
 
 DCT = dictionary.get()
 print(len(DCT))
@@ -91,7 +91,12 @@ train = tf.train.AdamOptimizer(learning_rate=LR).minimize(loss)
 for var in tf.trainable_variables():
     tf.summary.histogram(var.name, var)
 
-
+tf.summary.histogram("contr1", contr1)
+tf.summary.histogram("contr2", contr2)
+tf.summary.histogram("contr3", contr3)
+tf.summary.histogram("exp1", exp1)
+tf.summary.histogram("exp2", exp2)
+tf.summary.histogram("exp3", exp3)
 
 
 merged = tf.summary.merge_all()

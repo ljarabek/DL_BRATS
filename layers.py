@@ -1,6 +1,6 @@
 import tensorflow as tf
 from tensorflow.contrib.layers import xavier_initializer, l2_regularizer
-from preprocess import *
+from preprocessing import *
 import dictionary
 import SimpleITK as sitk
 import matplotlib.pyplot as plt
@@ -119,7 +119,6 @@ def interpolation(input,  name="interp_2x", no_filters = 4): #output_shape,
         #print("A + {}".format(A.get_shape()))
         output_shape = tf.constant([b_,x_,y_,z_,ch_], dtype= tf.int32)
         #output_shape = tf.convert_to_tensor(output_shape)
-
     return tf.nn.conv3d_transpose(input, filter=fil,output_shape = output_shape,strides=[1,2,2,2,1], padding= "SAME", name =  "interp_"+name)
 def prelu(input, alphax = 0.2):
     with tf.variable_scope("prelu"):
@@ -150,60 +149,7 @@ def expandingBlock(input, skip_input,phase_train, features_input, name = "expand
 
     return output
 
-"""def interpolation(data):
-    sh = data.shape
-    n = int(sh[4])
-    width, height, depth = int(sh[1]), int(sh[2]), int(sh[3])
-    batch_size = 1
-    #data = tf.transpose(data, [0, 4, 1, 2, 3])  # [batch_size,n,width,height,depth]
-    newshape = int(1 * n * width * height * depth)
-    flatten_it_all = tf.reshape(data, shape = [newshape, 1])  # flatten it
-    print(flatten_it_all.shape)  #(23592960, 1)
-    expanded_it = flatten_it_all * tf.ones([1, 8])
-    print(expanded_it.shape)  # (23592960, 8)
-    prepare_for_transpose = tf.reshape(expanded_it, [batch_size * n, width, height, depth, 2, 2, 2])
-    print(prepare_for_transpose.shape)
-    transpose_to_align_neighbors = tf.transpose(prepare_for_transpose, [0, 1, 6, 2, 5, 3, 4])
-    print(transpose_to_align_neighbors.shape)
-    expand_it_all = tf.reshape(transpose_to_align_neighbors, [batch_size, n, width * 2, height * 2, depth * 2])
-    expand_it_all = tf.transpose(expand_it_all, [0,2,3,4,1])
-    #### - removing this section because the requirements changed
-    # do a conv layer here to 'blend' neighbor values like:
-    averager = tf.ones([2,2,2,8,8]) * 1. / 8.
-    expand_it_all = tf.nn.conv3d( expand_it_all , strides = [1,2,2,2,1], filter = averager , padding="SAME")
-    # for n = 1.  for n = 3, I'll leave it to you.
 
-    # then finally reorder and you are done
-    #return expand_it_all # tf.transpose(expand_it_all, [0, 2, 3, 4, 1])
-    return prepare_for_transpose"""
-
-
-
-
-def interpolationxxx(data, scale = 2):
-    # yourData shape : [5,50,50,10,256] to [5,100,100,10,256]
-    # [1, x,y,z, channels]
-    # First reorder your dimensions to place them where tf.image.resize_images needs them
-
-    transposed = tf.transpose(data, [0, 3, 1, 2, 4])
-    sh = transposed.shape
-    # it is now [5,10,50,50,256]
-    # but we need it to be 4 dimensions, not 5
-    reshaped = tf.reshape(transposed, [sh[1]*sh[0], sh[2], sh[3], sh[4]]) # [5*10,50,50,256]
-
-    # and finally we use tf.image.resize_images
-    #new_size = tf.constant( [sh[2], sh[3]] * scale)
-    sh2 = sh[2]*2
-    sh3 = sh[3]*2
-    #print(sh2, sh3)
-    resized = tf.image.resize_images(reshaped, (sh2, sh3))
-
-    # your data is now [5*10,100,100,256]
-    undo_reshape = tf.reshape(resized, [sh[0], sh[1]])
-
-    # it is now [5,10,100,100,256] so lastly we need to reorder it
-    undo_transpose = tf.transpose(undo_reshape, [0, 2, 3, 1, 4])
-    return undo_transpose
 
 
 

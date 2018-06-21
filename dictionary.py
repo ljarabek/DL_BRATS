@@ -30,9 +30,9 @@ trainingDictionary ={}
 id = 1
 
 #najprej poberemo slike iz HGG
-os.chdir(train_path1)
+#os.chdir(train_path1)
 
-for file in os.listdir():
+for file in os.listdir(train_path1):
  absolutPath = train_path1 + "\\" + file
 
  #seznam vseh končnih map
@@ -45,9 +45,9 @@ for file in os.listdir():
 
 
 # nato poberemo slike iz LGG
-os.chdir(train_path2)
+#os.chdir(train_path2)
 
-for file in os.listdir():
+for file in os.listdir(train_path2):
     absolutPath = train_path2 + "\\" + file
     # seznam vseh končnih map
     endFiles = glob(absolutPath + "\\*\\*")
@@ -59,11 +59,11 @@ for file in os.listdir():
 
 #naredimo še slovar s test slikami
 test_path = "C:\BRATS\Testing\HGG_LGG"
-os.chdir(test_path)
+#os.chdir(test_path)
 
 testDictionary = {}
 
-for file in os.listdir():
+for file in os.listdir(test_path):
     absolutPath = test_path + "\\" + file
     # seznam vseh končnih map
     endFiles = glob(absolutPath + "\\*\\*")
