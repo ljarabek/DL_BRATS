@@ -35,6 +35,5 @@ class Patient(object):
 
 
     def getLabels(self):
-        # TODO: make each class own array with onehot encoding
         return 0
 

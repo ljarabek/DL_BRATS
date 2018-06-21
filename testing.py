@@ -9,6 +9,9 @@ import os
 if not os.path.exists('./preprocess/'):
     os.makedirs('./preprocess/')
 
+
+
+
 #dictionary of patients (keys: patient ids, values: image paths)
 #training dictionary
 dct = dictionary.get() #length = 274
@@ -88,22 +91,24 @@ def getBatchTraining():     #  Zanekrat je ozadje 0  -da ne vpliva na gradient
 
     return np.expand_dims(data,0), np.expand_dims(answers,0)
 
+def getBatchTest():
+    key = rand.choice(list(dctTest))
+    arr = []
+    for i in range(4):
+        arr.append(standardize(getMaskedArray(key, mod=i),
+                               i))
+
+    data = np.ma.masked_array(arr).filled(0)
+
+    return np.expand_dims(data, 0)
+
 
 #print(getN(2))
 #print(getN(1))
 
-def outputToChannels(id):
-    """ ta koda je sexy """
-    arr = np.array(sitk.GetArrayFromImage(sitk.ReadImage(dct[id][4])))[77 - 64:77 + 64, 128 - 80:128 + 80, 120 - 72:120 + 72]
-    zeros = np.expand_dims(np.zeros(arr.size),0)  # or shape...
-    buffer = np.zeros(arr.size)
-    buffer = np.append([buffer, buffer, buffer, buffer], zeros, 0)
-    flat = arr.flatten()
-    buffer[flat, np.arange(arr.size)] = 1
-    [x,y,z] = arr.shape
-    return np.reshape(buffer, newshape=(5,x,y,z)) # [1:]
+""""""
 
-def outputToChannelsTest(id):
+def outputToChannels(id):
     arr = np.array(sitk.GetArrayFromImage(sitk.ReadImage(dct[id][4])))[77 - 64:77 + 64, 128 - 80:128 + 80, 120 - 72:120 + 72]
 
     type0 = np.zeros(arr.shape)
@@ -210,7 +215,20 @@ plt.show()
 
 
 #he = Patient(25)
-#print(he.dirs)"""
+#print(he.dirs)
+
+def outputToChannels(id):
+    #  one way of doing it:
+    arr = np.array(sitk.GetArrayFromImage(sitk.ReadImage(dct[id][4])))[77 - 64:77 + 64, 128 - 80:128 + 80, 120 - 72:120 + 72]
+    zeros = np.expand_dims(np.zeros(arr.size),0)  # or shape...
+    buffer = np.zeros(arr.size)
+    buffer = np.append([buffer, buffer, buffer, buffer], zeros, 0)
+    flat = arr.flatten()
+    buffer[flat, np.arange(arr.size)] = 1
+    [x,y,z] = arr.shape
+    return np.reshape(buffer, newshape=(5,x,y,z)) 
+
+"""
 
 
 #displays a 3D picture
