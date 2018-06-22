@@ -62,7 +62,8 @@ def contractingBlock(input, phase_train, features_input, name = "_contrblock"):
         output1 = batch_norm(output_halved,features,phase_train=phase_train)
 
         output1 = prelu(output1)
-        output1 = batch_norm(output1, features, phase_train=phase_train)
+        #output1 = batch_norm(output1, features, phase_train=phase_train)
+        output1 = conv3D(output1, features=features)
         output_block = output1+output_halved
         output_block = batch_norm(output_block,features,phase_train=phase_train)
 
