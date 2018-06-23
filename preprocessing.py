@@ -100,7 +100,7 @@ def getBatchTraining():     #  Zanekrat je ozadje 0  -da ne vpliva na gradient
 
     return np.expand_dims(data,0), np.expand_dims(answers,0)
 
-def getBatchTest():
+def getBatchTest(returnID=False):
     key = rand.choice(list(dctTest))
     arr = []
     for i in range(4):
@@ -108,8 +108,10 @@ def getBatchTest():
                                i))
 
     data = np.ma.masked_array(arr).filled(0)
-
-    return np.expand_dims(data, 0)
+    if returnID:
+        return np.expand_dims(data, 0), key
+    else:
+        return np.expand_dims(data, 0)
 
 #multi_slice_viewer(getBatchTest()[0,0])
 #print(getN(2))
@@ -136,6 +138,10 @@ def outputToChannels(id):
     type4[arr == 4]=1
 
     return np.stack((type0,type1,type2,type3,type4))
+
+def channelsToOutput(image):  ## TODO : dub ven ID pr getbatchTest!!
+    a
+
 
 input, output = getBatchTraining()
 
@@ -238,6 +244,7 @@ def outputToChannels(id):
     return np.reshape(buffer, newshape=(5,x,y,z)) 
 
 """
+
 
 
 #displays a 3D picture
