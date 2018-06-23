@@ -6,9 +6,15 @@ import numpy.ma as ma
 import random as rand
 import os
 from presentation import multi_slice_viewer
+from configparser import ConfigParser
 
-
-
+cp = ConfigParser()
+cp.read("config.ini")
+cfg_crop = cp['CROP']
+for v in cfg_crop:
+    print(v)
+    exec(v + '= int(cfg_crop["'+v+'"])')
+print(x_0, x_r, y_0, y_r, z_0, z_r) # magic - don't delete
 
 if not os.path.exists('./preprocess/'):
     os.makedirs('./preprocess/')
@@ -87,8 +93,8 @@ def standardize(arr, mod):
     return (arr-getAvg(mod))/(getStd(mod) + 0.000000001)
 
 
-def getBatchTraining():     #  Zanekrat je ozadje 0  -da ne vpliva na gradient
-                    #  Lahko spremeniš z tem, da daš filled v standardize
+def getBatchTraining():
+    """OUTPUTA MODEL-READY VERZIJO"""
     key = rand.choice(list(dct))
     arr = []
     answers = outputToChannels(key)
@@ -141,9 +147,53 @@ def outputToChannels(id):
 
 def channelsToOutput(image, ID):  ## TODO : dub ven ID pr getbatchTest!!
     return np.argmax(image, axis=0), ID
+def saveOutput(output, dictIndex, path = './images/'):
+    sitk.W
 
 
 input, output = getBatchTraining()
+
+
+
+
+
+
+#displays a 3D picture
+def display_numpy(picture):
+    fig = plt.figure()
+    iter = int(len(picture) /30)
+    for num,slice in enumerate(picture):
+        if num>=30:
+            break
+        y = fig.add_subplot(5,6,num+1)
+
+        y.imshow(picture[num*iter], cmap='gray')
+    plt.show()
+    return
+
+
+def save_numpy(picture, batch, dir='C:/activations/', filename = "/graph.png"):
+    if not os.path.exists(dir):
+        os.makedirs(dir + '{}'.format(batch))
+    #dct = dictionary.get()
+    savedir = dir + '{}/'.format(batch)
+    fig = plt.figure()
+    iter = int(len(picture) /30)
+    for num,slice in enumerate(picture):
+        if num>=30:
+            break
+        y = fig.add_subplot(5,6,num+1)
+
+        y.imshow(picture[num*iter], cmap='gray')
+    plt.savefig(dir + str(batch)+filename, dpi=500, format = "png")
+    plt.close('all')
+    #plt.show()
+    return
+
+"""display_numpy(outputToChannels(10)[0])
+display_numpy(outputToChannels(10)[1])
+display_numpy(outputToChannels(10)[2])
+display_numpy(outputToChannels(10)[3])"""
 
 
 """def getBatch(size = 15, min= 0, max = 146):              BATCH SIZE je 1!!!
@@ -244,43 +294,3 @@ def outputToChannels(id):
     return np.reshape(buffer, newshape=(5,x,y,z)) 
 
 """
-
-
-
-#displays a 3D picture
-def display_numpy(picture):
-    fig = plt.figure()
-    iter = int(len(picture) /30)
-    for num,slice in enumerate(picture):
-        if num>=30:
-            break
-        y = fig.add_subplot(5,6,num+1)
-
-        y.imshow(picture[num*iter], cmap='gray')
-    plt.show()
-    return
-
-
-def save_numpy(picture, batch, dir='C:/activations/', filename = "/graph.png"):
-    if not os.path.exists(dir):
-        os.makedirs(dir + '{}'.format(batch))
-    #dct = dictionary.get()
-    savedir = dir + '{}/'.format(batch)
-    fig = plt.figure()
-    iter = int(len(picture) /30)
-    for num,slice in enumerate(picture):
-        if num>=30:
-            break
-        y = fig.add_subplot(5,6,num+1)
-
-        y.imshow(picture[num*iter], cmap='gray')
-    plt.savefig(dir + str(batch)+filename, dpi=500, format = "png")
-    plt.close('all')
-    #plt.show()
-    return
-
-"""display_numpy(outputToChannels(10)[0])
-display_numpy(outputToChannels(10)[1])
-display_numpy(outputToChannels(10)[2])
-display_numpy(outputToChannels(10)[3])"""
-
