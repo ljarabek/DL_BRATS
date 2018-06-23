@@ -139,8 +139,8 @@ def outputToChannels(id):
 
     return np.stack((type0,type1,type2,type3,type4))
 
-def channelsToOutput(image):  ## TODO : dub ven ID pr getbatchTest!!
-    a
+def channelsToOutput(image, ID):  ## TODO : dub ven ID pr getbatchTest!!
+    return np.argmax(image, axis=0), ID
 
 
 input, output = getBatchTraining()

@@ -47,7 +47,7 @@ def batch_norm(x, n_out, phase_train):
         normed = tf.nn.batch_normalization(x, mean, var, beta, gamma, 1e-3)
     return normed
 
-def conv3D(input, features, stride = 1,kernel = 3, name=None):
+def conv3D(input, features, stride = 1,kernel = 3, name=""):
     #weight = tf.get_variable(name="conv3d_"+name, shape=[])
     return tf.layers.conv3d(inputs = input, filters = features, kernel_size = [kernel,kernel,kernel], strides=[stride, stride, stride], padding = "same",
                      activation=None, use_bias = False, #data_format="channels_first"
@@ -71,7 +71,7 @@ def contractingBlock(input, phase_train, features_input, name = "_contrblock"):
     return output_block
 
 
-def deconv3D(input, features, stride = 2,kernel = 3, name=None):
+def deconv3D(input, features, stride = 2,kernel = 3, name=""):
     return tf.layers.conv3d_transpose(inputs=input, filters=features, kernel_size=[kernel,kernel,kernel],
                                       strides=[stride,stride,stride], padding="same",
                                       kernel_initializer=xavier_initializer(uniform=False, seed=seed),

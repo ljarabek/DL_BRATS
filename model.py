@@ -85,12 +85,13 @@ output =  tf.transpose(out3, [0,4,1,2,3])
 #loss = jaccard_coef_logloss(output, answer)
 loss = jaccard_coef_logloss(output, answer)
 tf.summary.scalar("loss", loss)
-LR = tf.placeholder(tf.float32)
+LR = tf.Variable(initial_value = 0.001 , dtype=tf.float32, trainable=False, name= "learning_rate")
+
 train = tf.train.AdamOptimizer(learning_rate=LR).minimize(loss)
 
 for var in tf.trainable_variables():
     tf.summary.histogram(var.name, var)
-
+tf.summary.scalar("learning_rate", LR)
 tf.summary.histogram("contr1", contr1)
 tf.summary.histogram("contr2", contr2)
 tf.summary.histogram("contr3", contr3)
@@ -111,16 +112,20 @@ with tf.Session() as sess:
     if ckpt and ckpt.model_checkpoint_path:
         loader = tf.train.Saver()
         load(loader, sess, ckpt.model_checkpoint_path)
-
-    learning_rate = 0.006
+        learning_rate = sess.run([LR], feed_dict={input:_input, phase_train:True, answer: _answer})
+    else:
+        learning_rate = 0.002
     top_loss = 1e5
-    for i in range(10):
+    for i in range(10000):
         _input, _answer = getBatchTraining()
-        otpt, loss_, summary, _ = sess.run([output, loss, merged, train], feed_dict={input:_input, phase_train:True, answer: _answer, LR:learning_rate})
+        otpt, loss_, summary, _ = sess.run([output, loss, merged, train],
+                                           feed_dict={input:_input, phase_train:True, answer: _answer, LR:learning_rate})
+        otpt = otpt[0]
+        np.save("out.npy", otpt)
         train_writer.add_summary(summary, i)
         if i%2500==0:
             learning_rate = learning_rate/2
-        if i%100==0 and loss_ < top_loss:
+        if i>800 and loss_ < top_loss:
             print("saving top results, loss: {}".format(loss_))
             top_loss=loss_
             save(saver, sess, checkpoint_dir, i)
@@ -129,7 +134,7 @@ with tf.Session() as sess:
 
 
 
-            """save_numpy(_input[0, 0, :, :, :], i, filename="in_flair.png")
+            save_numpy(_input[0, 0, :, :, :], i, filename="in_flair.png")
             save_numpy(_input[0, 1, :, :, :], i, filename="in_t1.png")
             save_numpy(_input[0, 2, :, :, :], i, filename="in_t1c.png")
             save_numpy(_input[0, 3, :, :, :], i, filename="in_t2.png")
@@ -145,7 +150,7 @@ with tf.Session() as sess:
             save_numpy(_answer[0, 4, :, :, :], i, filename="answer_4.png")  # tle je bil anwer3.png!!! napaka!
             np.save("C:/activations/{}input.npy".format(i), _input)
             np.save("C:/activations/{}output.npy".format(i), otpt)
-            np.save("C:/activations/{}output.npy".format(i), _answer)"""
+            np.save("C:/activations/{}output.npy".format(i), _answer)
             #save_numpy(_answer[0, 4, :, :, :], i, filename="answer_4.png")
             #save_numpy(_answer[0, 5, :, :, :], i, filename="answer_3.png")
         print(loss_, learning_rate)
