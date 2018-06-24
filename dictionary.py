@@ -78,7 +78,7 @@ def get():
     return trainingDictionary
 
 #vrne slovar slik za testiranje natančnosti
-def getTrainig():
+def getTest():
     return testDictionary
 
 """

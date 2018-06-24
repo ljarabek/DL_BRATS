@@ -15,7 +15,7 @@ for v in cfg_crop:
     print(v)
     exec(v + '= int(cfg_crop["'+v+'"])')
 print(x_0, x_r, y_0, y_r, z_0, z_r) # magic - don't delete
-
+print(int(cfg_crop['x_0']))
 if not os.path.exists('./preprocess/'):
     os.makedirs('./preprocess/')
 
@@ -27,7 +27,7 @@ if not os.path.exists('./preprocess/'):
 dct = dictionary.get() #length = 274
 
 #test dictionary
-dctTest = dictionary.getTrainig() #length = 110
+dctTest = dictionary.getTest() #length = 110
 
 def getMaskedArray(i, mod):
     '''returns cropped array, where values 0 are masked'''

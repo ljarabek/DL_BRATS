@@ -113,6 +113,7 @@ with tf.Session() as sess:
         loader = tf.train.Saver()
         load(loader, sess, ckpt.model_checkpoint_path)
         learning_rate = sess.run([LR], feed_dict={input:_input, phase_train:True, answer: _answer})
+        learning_rate = learning_rate[0] # ker fukne ven array z 1
     else:
         learning_rate = 0.002
     top_loss = 1e5
@@ -123,9 +124,9 @@ with tf.Session() as sess:
         otpt = otpt[0]
         np.save("out.npy", otpt)
         train_writer.add_summary(summary, i)
-        if i%2500==0:
+        if i%2500==2490:
             learning_rate = learning_rate/2
-        if i>800 and loss_ < top_loss:
+        if i>0 and loss_ < top_loss:
             print("saving top results, loss: {}".format(loss_))
             top_loss=loss_
             save(saver, sess, checkpoint_dir, i)
@@ -138,11 +139,11 @@ with tf.Session() as sess:
             save_numpy(_input[0, 1, :, :, :], i, filename="in_t1.png")
             save_numpy(_input[0, 2, :, :, :], i, filename="in_t1c.png")
             save_numpy(_input[0, 3, :, :, :], i, filename="in_t2.png")
-            save_numpy(otpt[0, 0, :, :, :], i, filename = "out_0.png")
-            save_numpy(otpt[0, 1, :, :, :], i, filename="out_1.png")
-            save_numpy(otpt[0, 2, :, :, :], i, filename = "out_2.png")
-            save_numpy(otpt[0, 3, :, :, :], i, filename="out_3.png")
-            save_numpy(otpt[0, 4, :, :, :], i, filename="out_4.png")
+            save_numpy(otpt[0, :, :, :], i, filename = "out_0.png")
+            save_numpy(otpt[ 1, :, :, :], i, filename="out_1.png")
+            save_numpy(otpt[ 2, :, :, :], i, filename = "out_2.png")
+            save_numpy(otpt[3, :, :, :], i, filename="out_3.png")
+            save_numpy(otpt[ 4, :, :, :], i, filename="out_4.png")
             save_numpy(_answer[0, 0, :, :, :], i, filename = "answer_0.png")
             save_numpy(_answer[0, 1, :, :, :], i, filename="answer_1.png")
             save_numpy(_answer[0, 2, :, :, :], i, filename="answer_2.png")
