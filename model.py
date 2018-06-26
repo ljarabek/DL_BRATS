@@ -104,7 +104,9 @@ merged = tf.summary.merge_all()
 
 #output = tf.transpose(Ar, [0, 1, 6, 2, 5, 3, 4])
 
+
 with tf.Session() as sess:
+    train = False
     sess.run(tf.global_variables_initializer())
     train_writer = tf.summary.FileWriter( 'C:/train/', sess.graph)
     saver = tf.train.Saver()
@@ -117,44 +119,64 @@ with tf.Session() as sess:
     else:
         learning_rate = 0.002
     top_loss = 1e5
-    for i in range(10000):
+    for i in range(500):
         _input, _answer = getBatchTraining()
-        otpt, loss_, summary, _ = sess.run([output, loss, merged, train],
-                                           feed_dict={input:_input, phase_train:True, answer: _answer, LR:learning_rate})
-        otpt = otpt[0]
-        np.save("out.npy", otpt)
-        train_writer.add_summary(summary, i)
-        if i%2500==2490:
-            learning_rate = learning_rate/2
-        if i>0 and loss_ < top_loss:
-            print("saving top results, loss: {}".format(loss_))
-            top_loss=loss_
-            save(saver, sess, checkpoint_dir, i)
+        if train:
+            otpt, loss_, summary, _ = sess.run([output, loss, merged, train],
+                                               feed_dict={input:_input, phase_train:True, answer: _answer, LR:learning_rate})
+
+
+            otpt = otpt[0]
+
+            np.save("out.npy", otpt)
+            train_writer.add_summary(summary, i)
+            if i%2500==2490:
+                learning_rate = learning_rate/2
+            if i>500 and loss_ < top_loss and i%50==0:
+                print("saving top results, loss: {}".format(loss_))
+                top_loss=loss_
+                save(saver, sess, checkpoint_dir, i)
 
 
 
 
 
-            save_numpy(_input[0, 0, :, :, :], i, filename="in_flair.png")
-            save_numpy(_input[0, 1, :, :, :], i, filename="in_t1.png")
-            save_numpy(_input[0, 2, :, :, :], i, filename="in_t1c.png")
-            save_numpy(_input[0, 3, :, :, :], i, filename="in_t2.png")
-            save_numpy(otpt[0, :, :, :], i, filename = "out_0.png")
-            save_numpy(otpt[ 1, :, :, :], i, filename="out_1.png")
-            save_numpy(otpt[ 2, :, :, :], i, filename = "out_2.png")
-            save_numpy(otpt[3, :, :, :], i, filename="out_3.png")
-            save_numpy(otpt[ 4, :, :, :], i, filename="out_4.png")
-            save_numpy(_answer[0, 0, :, :, :], i, filename = "answer_0.png")
-            save_numpy(_answer[0, 1, :, :, :], i, filename="answer_1.png")
-            save_numpy(_answer[0, 2, :, :, :], i, filename="answer_2.png")
-            save_numpy(_answer[0, 3, :, :, :], i, filename = "answer_3.png")
-            save_numpy(_answer[0, 4, :, :, :], i, filename="answer_4.png")  # tle je bil anwer3.png!!! napaka!
-            np.save("C:/activations/{}input.npy".format(i), _input)
-            np.save("C:/activations/{}output.npy".format(i), otpt)
-            np.save("C:/activations/{}output.npy".format(i), _answer)
-            #save_numpy(_answer[0, 4, :, :, :], i, filename="answer_4.png")
-            #save_numpy(_answer[0, 5, :, :, :], i, filename="answer_3.png")
-        print(loss_, learning_rate)
+                save_numpy(_input[0, 0, :, :, :], i, filename="in_flair.png")
+                save_numpy(_input[0, 1, :, :, :], i, filename="in_t1.png")
+                save_numpy(_input[0, 2, :, :, :], i, filename="in_t1c.png")
+                save_numpy(_input[0, 3, :, :, :], i, filename="in_t2.png")
+                save_numpy(otpt[0, :, :, :], i, filename = "out_0.png")
+                save_numpy(otpt[ 1, :, :, :], i, filename="out_1.png")
+                save_numpy(otpt[ 2, :, :, :], i, filename = "out_2.png")
+                save_numpy(otpt[3, :, :, :], i, filename="out_3.png")
+                save_numpy(otpt[ 4, :, :, :], i, filename="out_4.png")
+                save_numpy(_answer[0, 0, :, :, :], i, filename = "answer_0.png")
+                save_numpy(_answer[0, 1, :, :, :], i, filename="answer_1.png")
+                save_numpy(_answer[0, 2, :, :, :], i, filename="answer_2.png")
+                save_numpy(_answer[0, 3, :, :, :], i, filename = "answer_3.png")
+                save_numpy(_answer[0, 4, :, :, :], i, filename="answer_4.png")  # tle je bil anwer3.png!!! napaka!
+                np.save("C:/activations/{}input.npy".format(i), _input)
+                np.save("C:/activations/{}output.npy".format(i), otpt)
+                np.save("C:/activations/{}output.npy".format(i), _answer)
+                #save_numpy(_answer[0, 4, :, :, :], i, filename="answer_4.png")
+                #save_numpy(_answer[0, 5, :, :, :], i, filename="answer_3.png")
+            print(loss_, learning_rate)
+        else:
+            _input, ID = getBatchTest(True)
+            otpt, summary = sess.run([output, merged],
+                                            feed_dict={input: _input, phase_train: True, answer: _answer})
+            otpt = otpt[0]
+            saveSegmentation(_input[0,2],otpt,i)
+            save_numpy(_input[0, 2, :, :, :], i, dir='C:/activations_Segmentations/',filename="in_t1c" + str(ID) + ".png")
+            """save_numpy(_input[0, 0, :, :, :], i, filename="in_flair"+str(ID)+".png")
+            save_numpy(_input[0, 1, :, :, :], i, filename="in_t1"+str(ID)+".png")
+            save_numpy(_input[0, 2, :, :, :], i, filename="in_t1c"+str(ID)+".png")
+            save_numpy(_input[0, 3, :, :, :], i, filename="in_t2"+str(ID)+".png")
+            save_numpy(otpt[0, :, :, :], i, filename="out_0"+str(ID)+".png")
+            save_numpy(otpt[1, :, :, :], i, filename="out_1"+str(ID)+".png")
+            save_numpy(otpt[2, :, :, :], i, filename="out_2"+str(ID)+".png")
+            save_numpy(otpt[3, :, :, :], i, filename="out_3"+str(ID)+".png")
+            save_numpy(otpt[4, :, :, :], i, filename="out_4"+str(ID)+".png")"""
     train_writer.close()
     print(otpt.shape)
     print(loss_)
