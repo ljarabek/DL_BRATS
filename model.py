@@ -121,6 +121,8 @@ with tf.Session() as sess:
     top_loss = 1e5
     for i in range(500):
         _input, _answer = getBatchTraining()
+
+
         if train:
             otpt, loss_, summary, _ = sess.run([output, loss, merged, train],
                                                feed_dict={input:_input, phase_train:True, answer: _answer, LR:learning_rate})

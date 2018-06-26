@@ -145,11 +145,23 @@ def outputToChannels(id):
 
     return np.stack((type0,type1,type2,type3,type4))
 
-def channelsToOutput(image, ID):  ## TODO : dub ven ID pr getbatchTest!!
+def channelsToOutput(image, ID=0):  ## TODO : dub ven ID pr getbatchTest!!
+    if image.shape[0]==1: #da ignorira batch=1
+        image=image[0]
     return np.argmax(image, axis=0), ID
-def saveOutput(output, dictIndex, path = './images/'):
-    sitk.W
 
+def resizeOutput(out):
+    zeros = np.zeros(shape=[155,240,240])
+    for x, n in enumerate(out):
+        for y, m in enumerate(n):
+            for z, o in enumerate(m):
+                zeros[x+13, y+48,z+48]=o
+    return zeros
+
+def saveOutput(otpt, filename):
+    #out, _ = channelsToOutput(otpt, None)
+    out = sitk.GetImageFromArray(np.array(otpt, dtype=float))
+    sitk.WriteImage(out, filename)
 
 input, output = getBatchTraining()
 
