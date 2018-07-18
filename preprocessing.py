@@ -24,14 +24,24 @@ if not os.path.exists('./preprocess/'):
 
 #dictionary of patients (keys: patient ids, values: image paths)
 #training dictionary
-dct = dictionary.get() #length = 274
+dct = dictionary.get() #length = 254
+
+#validation dictionary
+dctVal = dictionary.getVal()    # len = val_len = 20
 
 #test dictionary
 dctTest = dictionary.getTest() #length = 110
 
+
+
 def getMaskedArray(i, mod):
     '''returns cropped array, where values 0 are masked'''
     arr = sitk.GetArrayFromImage(sitk.ReadImage(dct[i][mod]))[77 - 64:77 + 64, 128 - 80:128 + 80, 120 - 72:120 + 72]
+    return ma.masked_values(arr,0)
+
+def getMaskedArrayVal(i, mod):
+    '''returns cropped array, where values 0 are masked'''
+    arr = sitk.GetArrayFromImage(sitk.ReadImage(dctVal[i][mod]))[77 - 64:77 + 64, 128 - 80:128 + 80, 120 - 72:120 + 72]
     return ma.masked_values(arr,0)
 
 def getMaskedArrayTest(i, mod):
@@ -106,6 +116,21 @@ def getBatchTraining():
 
     return np.expand_dims(data,0), np.expand_dims(answers,0)
 
+def getVal(returnID=False): # vrne cel set slik za validacijo
+    #key = rand.choice(list(dctVal))
+    arr = []
+    output
+    for key in list(dctVal):
+        for i in range(4):
+            arr.append(standardize(getMaskedArrayVal(key, mod=i),
+                                   i))
+
+        data = np.ma.masked_array(arr).filled(0)
+        if returnID:
+            return np.expand_dims(data, 0), key
+        else:
+            return np.expand_dims(data, 0)
+
 def getBatchTest(returnID=False):
     key = rand.choice(list(dctTest))
     arr = []
@@ -118,6 +143,8 @@ def getBatchTest(returnID=False):
         return np.expand_dims(data, 0), key
     else:
         return np.expand_dims(data, 0)
+
+
 
 #multi_slice_viewer(getBatchTest()[0,0])
 #print(getN(2))
@@ -163,25 +190,7 @@ def saveOutput(otpt, filename):
     out = sitk.GetImageFromArray(np.array(otpt, dtype=float))
     sitk.WriteImage(out, filename)
 
-input, output = getBatchTraining()
 
-
-
-
-
-
-#displays a 3D picture
-def display_numpy(picture):
-    fig = plt.figure()
-    iter = int(len(picture) /30)
-    for num,slice in enumerate(picture):
-        if num>=30:
-            break
-        y = fig.add_subplot(5,6,num+1)
-
-        y.imshow(picture[num*iter], cmap='gray')
-    plt.show()
-    return
 
 
 def save_numpy(picture, batch, dir='C:/activations/', filename = "/graph.png"):
@@ -201,26 +210,7 @@ def save_numpy(picture, batch, dir='C:/activations/', filename = "/graph.png"):
     #plt.show()
     return
 
-def saveSegmentation( arrayT1c,out, batch, dir='C:/activations_Segmentations/', filename = "graph.png"):
-    if not os.path.exists(dir):
-        os.makedirs(dir)
-    #dct = dictionary.get()
-    #savedir = dir + '{}/'.format(batch)
-    fig = plt.figure()
-    iter = int(len(arrayT1c) /30)
-    for num,slice in enumerate(arrayT1c):
-        if num>=30:
-            break
-        y = fig.add_subplot(5,6,num+1)
-        y.imshow(out[1][num*iter],cmap="Blues",alpha=1)
-        y.imshow(out[2][num*iter], cmap="Reds", alpha=0.5)
-        y.imshow(out[3][num*iter], cmap="Greens", alpha=0.33333333)
-        y.imshow(out[4][num*iter],cmap="Purples", alpha=0.25)
-        y.imshow(arrayT1c[num * iter], cmap='gray', alpha=0.6)
-    plt.savefig(dir + str(batch)+filename, dpi=500, format = "png")
-    plt.close('all')
-    #plt.show()
-    return
+
 
 """display_numpy(outputToChannels(10)[0])
 display_numpy(outputToChannels(10)[1])

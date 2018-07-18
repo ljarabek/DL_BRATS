@@ -2,6 +2,8 @@ import os
 import re
 from glob import glob
 
+val_size = 20   # koliko slik za validacijo
+
 def ending(fileList, end = ".mha"):
     "Funkcija  prejme seznam datotek in vrne seznam datotek, ki se koncajo na dano končnico end"
     newList = []
@@ -25,23 +27,29 @@ def getID(file):
 train_path1 = 'C:\\BRATS\\BRATS2015_Training\\HGG'
 train_path2 = 'C:\\BRATS\\BRATS2015_Training\\LGG'
 
-#Nareidmo slovar, kjer so ključi zaporedna stevilka pacienta vrednosti pa absoltune poti datotek Flair,T1,T1c,T2, answer"
+#Nareidmo slovar, kjer so ključi zaporedna stevilka pacienta vrednosti pa absoltune poti datotek Flair,T1,T1c,T2, answer
 trainingDictionary ={}
+validationDictionary = {}
 id = 1
+
+
 
 #najprej poberemo slike iz HGG
 #os.chdir(train_path1)
 
 for file in os.listdir(train_path1):
- absolutPath = train_path1 + "\\" + file
+    absolutPath = train_path1 + "\\" + file
 
- #seznam vseh končnih map
- endFiles = glob(absolutPath + "\\*\\*")
- #izberemo samo datoteke, ki  se končajo na .mha
- endFiles = ending(endFiles)
- #shranimo v slovar
- trainingDictionary[id] = endFiles
- id += 1
+    #seznam vseh končnih map
+    endFiles = glob(absolutPath + "\\*\\*")
+    #izberemo samo datoteke, ki  se končajo na .mha
+    endFiles = ending(endFiles)
+    #shranimo v slovar
+    if id>val_size:    # prvih val_size slik gre v validationDict, ostale pa v trainingDict
+        trainingDictionary[id] = endFiles
+    else:
+        validationDictionary[id] = endFiles
+    id += 1
 
 
 # nato poberemo slike iz LGG
@@ -76,6 +84,15 @@ for file in os.listdir(test_path):
 #vrne slovar slik za učiti
 def get():
     return trainingDictionary
+
+
+
+
+def getVal():
+    return validationDictionary
+
+print(len(get()))
+print(len(getVal()))
 
 #vrne slovar slik za testiranje natančnosti
 def getTest():
