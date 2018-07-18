@@ -1,16 +1,6 @@
 import tensorflow as tf
 from tensorflow.contrib.layers import xavier_initializer, l2_regularizer
-from preprocessing import *
-import dictionary
-import SimpleITK as sitk
-import matplotlib.pyplot as plt
-import numpy as np
-import numpy.ma as ma
-import random as rand
-from tqdm import tqdm
-from patient import Patient
-import os
-from loss_function import jaccard_loss
+
 
 seed = 42
 l2_regularization = 0.0
@@ -48,7 +38,6 @@ def batch_norm(x, n_out, phase_train):
     return normed
 
 def conv3D(input, features, stride = 1,kernel = 3, name=""):
-    #weight = tf.get_variable(name="conv3d_"+name, shape=[])
     return tf.layers.conv3d(inputs = input, filters = features, kernel_size = [kernel,kernel,kernel], strides=[stride, stride, stride], padding = "same",
                      activation=None, use_bias = False, #data_format="channels_first"
                      kernel_initializer = xavier_initializer(uniform = False, seed = seed),
@@ -72,6 +61,13 @@ def contractingBlock(input, phase_train, features_input, name = "_contrblock"):
 
 
 def deconv3D(input, features, stride = 2,kernel = 3, name=""):
+    """
+    :param input:
+    :param features: int number of output features/channels
+    :param stride: int stride in all 3 dimensions
+    :param kernel: int kernel size
+    :param name: name in graph will be deconv3d_name
+    """
     return tf.layers.conv3d_transpose(inputs=input, filters=features, kernel_size=[kernel,kernel,kernel],
                                       strides=[stride,stride,stride], padding="same",
                                       kernel_initializer=xavier_initializer(uniform=False, seed=seed),
@@ -79,10 +75,9 @@ def deconv3D(input, features, stride = 2,kernel = 3, name=""):
                                       kernel_regularizer=l2_regularizer(l2_regularization), trainable=True,
                                       name="deconv3d_" + name)
 
-def interpolation(input,  name="interp_2x", no_filters = 4): #output_shape,
+def interpolation(input,  name="interp_2x", no_filters = 4):
     """
     :param input: data
-    :param output_shape: [batch x*2 y*2 z*2 channels]
     :param name: name
     :return: interpolated matrix (double the size)
     """
@@ -92,34 +87,19 @@ def interpolation(input,  name="interp_2x", no_filters = 4): #output_shape,
                               [[0.125, 0.25, 0.125],     [0.25, 0.5, 0.25],     [0.125, 0.25, 0.125]]],
                        name = "interp_kernel_"+name)
         A = tf.expand_dims(A, axis = 3)
-        #print(tf.shape(A))
         A = tf.expand_dims(A, axis=4)
         fil= tf.concat([A, A], axis = 3,name="conc5")
         buffer = tf.concat([A,A], axis=3,name="conc4")
-        #B = tf.concat([B, A], axis=4)
         for i in range(no_filters-2):
             fil = tf.concat([fil,A], axis=3, name="conc")
             buffer = tf.concat([buffer, A], axis=3,name="conc1")
-            #B = tf.concat([B, A], axis=4)
         for i in range(no_filters-1):
             fil = tf.concat([fil, buffer], axis = 4,name="conc2")
-        #A = tf.stack([A, A, A, A, A], axis=3)
-        #A = tf.stack([A, A, A, A, A], axis=4)
-        #print(tf.shape(A))
-
         b_, x_, y_, z_, ch_ = list(input.get_shape())
         x_ *=2
         y_ *=2
         z_ *=2
-        #print("channels for interp: "+ str(x_))
-        #b, x, y, z, ch= output_shape
-
-        #for i in range(int(int(ch_)/2)):
-        #B = tf.concat([A, A], axis = 3)
-        #B = tf.concat([A, A], axis=4)
-        #print("A + {}".format(A.get_shape()))
         output_shape = tf.constant([b_,x_,y_,z_,ch_], dtype= tf.int32)
-        #output_shape = tf.convert_to_tensor(output_shape)
     return tf.nn.conv3d_transpose(input, filter=fil,output_shape = output_shape,strides=[1,2,2,2,1], padding= "SAME", name =  "interp_"+name)
 def prelu(input, alphax = 0.2):
     with tf.variable_scope("prelu"):

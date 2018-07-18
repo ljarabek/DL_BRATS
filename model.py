@@ -8,7 +8,6 @@ import numpy as np
 import numpy.ma as ma
 import random as rand
 from tqdm import tqdm
-from patient import Patient
 import os
 from loss_function import *
 from layers import *
