@@ -9,12 +9,21 @@ from presentation import multi_slice_viewer
 from configparser import ConfigParser
 from itertools import tee
 
+
 cp = ConfigParser()
+cp.read("config.ini")
+cfg = cp['CROP']
+#val_size = int(cfg[''])
+for d in cfg:
+    #print(cfg[d])
+    exec("%s = %s"%(d, cfg[d]))
+
+"""cp = ConfigParser()
 cp.read("config.ini")
 cfg_crop = cp['CROP']
 for v in cfg_crop:
     print(v)
-    exec(v + '= int(cfg_crop["' + v + '"])')
+    exec(v + '= int(cfg_crop["' + v + '"])')"""
 if not os.path.exists('./preprocess/'):
     os.makedirs('./preprocess/')
 

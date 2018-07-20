@@ -68,6 +68,7 @@ def save_numpy(picture, batch, dir='C:/activations/', filename = "/graph.png"):
 """
 #TEST getBatchVal():
 #i == 20 mora bit isto kot i==0
-"""
+
 for i in range(30):
     print("%s : %s" %(i, getBatchVal()[0,0,64,80,70]))
+"""

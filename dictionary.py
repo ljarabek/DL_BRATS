@@ -1,8 +1,17 @@
 import os
 import re
 from glob import glob
+from configparser import ConfigParser
 
-val_size = 20   # koliko slik za validacijo
+cp = ConfigParser()
+cp.read("config.ini")
+cfg = cp['DEFAULT']
+val_size = int(cfg['val_size'])
+for d in cfg:
+    #print(cfg[d])
+    exec("%s = %s"%(d, cfg[d]))
+#print(type(deal))
+#val_size = 20   # koliko slik za validacijo
 
 def ending(fileList, end = ".mha"):
     "Funkcija  prejme seznam datotek in vrne seznam datotek, ki se koncajo na dano končnico end"
@@ -91,8 +100,7 @@ def get():
 def getVal():
     return validationDictionary
 
-print(len(get()))
-print(len(getVal()))
+
 
 #vrne slovar slik za testiranje natančnosti
 def getTest():

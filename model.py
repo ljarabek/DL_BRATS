@@ -14,11 +14,28 @@ from layers import *
 from preprocessing import *
 from postprocessing import *
 
+
+
+"""III IMPORTANT III"""
+
+
+
+
 DCT = dictionary.get()
 print(len(DCT))
 seed = 42
 l2_regularization = 0.0
 checkpoint_dir = "./checkpoint"
+
+"""READ CONFIG"""
+cp = ConfigParser()
+cp.read("config.ini")
+cfg = cp['DEFAULT']
+val_size = int(cfg['val_size'])
+for d in cfg:
+    print(cfg[d])
+    exec("%s = %s"%(d, cfg[d]))     # loads all variables from config.ini DEFAULT
+print(batches)
 
 _input, _answer = getBatchTraining()
 
@@ -78,45 +95,56 @@ merged = tf.summary.merge_all()
 
 
 with tf.Session() as sess:
-    train = False
-    sess.run(tf.global_variables_initializer())
-    train_writer = tf.summary.FileWriter('C:/train/', sess.graph)
+
+    sess.run(tf.global_variables_initializer())                                 # initialize variables
+    train_writer = tf.summary.FileWriter('C:/train/', sess.graph)               # write graph to tensorboard
     saver = tf.train.Saver()
-    ckpt = tf.train.get_checkpoint_state(checkpoint_dir=checkpoint_dir)
-    if ckpt and ckpt.model_checkpoint_path:
-        loader = tf.train.Saver()
+    ckpt = tf.train.get_checkpoint_state(checkpoint_dir=checkpoint_dir)         # loads existing checkpoint
+
+    top_loss_step = 0   # batch step where best loss was achieved
+
+    if ckpt and ckpt.model_checkpoint_path:     # loads ckpt if it exists and
+        loader = tf.train.Saver()               # obtains latest learning rate of the model
         load(loader, sess, ckpt.model_checkpoint_path)
         learning_rate = sess.run([LR], feed_dict={input: _input, phase_train: True, answer: _answer})
-        learning_rate = learning_rate[0]  # ker je output [LR], mi rabmo LR
+        learning_rate = learning_rate[0]
     else:
-        learning_rate = 0.002
-    top_loss = 1e5
-    for i in range(500):
+        learning_rate = lr_0
+    top_loss = 1e5      # placeholder for lowest loss
+    for i in range(batches):
         _input, _answer = getBatchTraining()
 
-        if train:
+        if _train:
             otpt, loss_, summary, _ = sess.run([output, loss, merged, train],
                                                feed_dict={input: _input, phase_train: True, answer: _answer,
                                                           LR: learning_rate})
 
-            otpt = otpt[0]
+            if i%50==0:
+                """for i in range()
+                _input, _answer = getBatchVal()"""
 
-            np.save("out.npy", otpt)
+            otpt = otpt[0]
             train_writer.add_summary(summary, i)
-            if i % 2500 == 2490:
-                learning_rate = learning_rate / 2
+            if (i+1) % lr_rate == 2490:
+                learning_rate = learning_rate * lr_multiplier
             if i > 500 and loss_ < top_loss and i % 50 == 0:
                 print("saving top results, loss: {}".format(loss_))
                 top_loss = loss_
+                top_loss_step = i
                 save(saver, sess, checkpoint_dir, i)
 
+
+            #TIMEOUT:
+            if i>top_loss_step+4000:
+                print("No progress in last 4k steps, stopping training")
+                break
             print(loss_, learning_rate)
         else:
             _input, ID = getBatchTest(True)
             otpt, summary = sess.run([output, merged],
                                      feed_dict={input: _input, phase_train: True, answer: _answer})
             otpt = otpt[0]
-            saveSegmentation(_input[0, 2], otpt, i)
+            saveSegmentation(_input[0, 2], otpt, i,"c:/new_segmentations/")
 
     train_writer.close()
     print(otpt.shape)
