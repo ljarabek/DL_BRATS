@@ -10,6 +10,7 @@ from configparser import ConfigParser
 from itertools import tee
 
 
+
 cp = ConfigParser()
 cp.read("config.ini")
 cfg = cp['CROP']
@@ -142,12 +143,14 @@ def getBatchVal():
     except:
         valIterable = iter(dctVal)
         key = valIterable.__next__()
+
+    answers = outputToChannelsVal(key)
     for i in range(4):
         arr.append(standardize(getMaskedArrayVal(key, mod=i),
                                i))
 
     data = np.ma.masked_array(arr).filled(0)
-    return np.expand_dims(data, 0)
+    return np.expand_dims(data, 0), np.expand_dims(answers, 0)
 
 
 def getBatchTest(returnID=False):
@@ -169,6 +172,28 @@ def getBatchTest(returnID=False):
 # print(getN(1))
 
 """"""
+
+
+def outputToChannelsVal(id):
+    arr = np.array(sitk.GetArrayFromImage(sitk.ReadImage(dctVal[id][4])))[x_0 - x_r: x_0 + x_r, y_0 - y_r: y_0 + y_r,
+          z_0 - z_r: z_0 + z_r]
+
+    type0 = np.zeros(arr.shape)
+    type0[arr == 0] = 1
+
+    type1 = np.zeros(arr.shape)
+    type1[arr == 1] = 1
+
+    type2 = np.zeros(arr.shape)
+    type2[arr == 2] = 1
+
+    type3 = np.zeros(arr.shape)
+    type3[arr == 3] = 1
+
+    type4 = np.zeros(arr.shape)
+    type4[arr == 4] = 1
+
+    return np.stack((type0, type1, type2, type3, type4))
 
 
 def outputToChannels(id):
@@ -196,7 +221,7 @@ def outputToChannels(id):
 def channelsToOutput(image, ID=0):  ## TODO : dub ven ID pr getbatchTest!!
     if image.shape[0] == 1:  # da ignorira batch=1
         image = image[0]
-    return np.argmax(image, axis=0), ID
+    return np.argmax(image, axis=0) #, ID
 
 
 def resizeOutput(out):

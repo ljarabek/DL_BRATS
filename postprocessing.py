@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 import SimpleITK as sitk
-from preprocessing import getBatchVal
+from preprocessing import getBatchVal, channelsToOutput
 
 #displays a 3D picture
 def display_numpy(picture):
@@ -65,10 +65,15 @@ def save_numpy(picture, batch, dir='C:/activations/', filename = "/graph.png"):
     #plt.show()
     return
 
-"""
+
 #TEST getBatchVal():
 #i == 20 mora bit isto kot i==0
 
-for i in range(30):
-    print("%s : %s" %(i, getBatchVal()[0,0,64,80,70]))
-"""
+#for i in range(30):
+#    i_, a_ = getBatchVal()
+#    print("%s : %s" %(i, i_[0, 0, 64, 80, 70]))
+#    print(a_.shape)
+#    if i ==5:
+#        display_numpy(channelsToOutput(a_))
+#        display_numpy(channelsToOutput(a_[0]))
+#

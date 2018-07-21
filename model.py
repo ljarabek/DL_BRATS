@@ -14,6 +14,7 @@ from layers import *
 from preprocessing import *
 from postprocessing import *
 
+from modelTesting import train_model
 
 
 """III IMPORTANT III"""
@@ -25,15 +26,15 @@ DCT = dictionary.get()
 print(len(DCT))
 seed = 42
 l2_regularization = 0.0
-checkpoint_dir = "./checkpoint"
+
 
 """READ CONFIG"""
 cp = ConfigParser()
 cp.read("config.ini")
 cfg = cp['DEFAULT']
-val_size = int(cfg['val_size'])
+#val_size = int(cfg['val_size'])
 for d in cfg:
-    print(cfg[d])
+    print("%s = %s"%(d, cfg[d]))
     exec("%s = %s"%(d, cfg[d]))     # loads all variables from config.ini DEFAULT
 print(batches)
 
@@ -41,9 +42,9 @@ _input, _answer = getBatchTraining()
 
 print(_input.shape)  # (1, 4, 128, 160, 144)
 
-input = tf.placeholder(dtype=tf.float32, shape=_input.shape)
-answer = tf.placeholder(dtype=tf.float32, shape=_answer.shape)
-phase_train = tf.placeholder(dtype=tf.bool)
+input = tf.placeholder(dtype=tf.float32, shape=_input.shape, name="input")
+answer = tf.placeholder(dtype=tf.float32, shape=_answer.shape, name="answer")
+phase_train = tf.placeholder(dtype=tf.bool, name="phase_train")
 
 
 
@@ -73,13 +74,16 @@ out3 = conv3D(exp3, 5, 1, 1, name="1x1x1_conv_3")
 out3 = out3 + out2
 out3 = tf.nn.softmax(out3, dim=-1, name="softmax")
 
-output = tf.transpose(out3, [0, 4, 1, 2, 3])
+output = tf.transpose(out3, [0, 4, 1, 2, 3], name="output")
 
-loss = jaccard_coef_logloss(output, answer)
+loss = jaccard_coef_logloss(output, answer, name="loss")
 tf.summary.scalar("loss", loss)
 LR = tf.Variable(initial_value=0.001, dtype=tf.float32, trainable=False, name="learning_rate")
 
-train = tf.train.AdamOptimizer(learning_rate=LR).minimize(loss)
+train = tf.train.AdamOptimizer(learning_rate=LR, name="train").minimize(loss)
+
+
+
 
 for var in tf.trainable_variables():
     tf.summary.histogram(var.name, var)
@@ -91,10 +95,12 @@ tf.summary.histogram("exp1", exp1)
 tf.summary.histogram("exp2", exp2)
 tf.summary.histogram("exp3", exp3)
 
-merged = tf.summary.merge_all()
+merged = tf.summary.merge_all()           # black magic
 
+sess = tf.Session()
+train_model(sess)
 
-with tf.Session() as sess:
+"""with tf.Session() as sess:
 
     sess.run(tf.global_variables_initializer())                                 # initialize variables
     train_writer = tf.summary.FileWriter('C:/train/', sess.graph)               # write graph to tensorboard
@@ -120,8 +126,10 @@ with tf.Session() as sess:
                                                           LR: learning_rate})
 
             if i%50==0:
-                """for i in range()
-                _input, _answer = getBatchVal()"""
+                for i in range(val_size):
+                    _input, _answer = getBatchVal()
+                    otpt, summary = sess.run([output, merged],
+                                             feed_dict={input: _input, phase_train: True, answer: _answer})
 
             otpt = otpt[0]
             train_writer.add_summary(summary, i)
@@ -144,8 +152,10 @@ with tf.Session() as sess:
             otpt, summary = sess.run([output, merged],
                                      feed_dict={input: _input, phase_train: True, answer: _answer})
             otpt = otpt[0]
+
             saveSegmentation(_input[0, 2], otpt, i,"c:/new_segmentations/")
 
     train_writer.close()
     print(otpt.shape)
     print(loss_)
+"""

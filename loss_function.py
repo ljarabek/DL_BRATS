@@ -39,7 +39,7 @@ def jaccard2(P, T):
     return normPT/(normP**2 + normT**2 - normPT)
 
 
-def jaccard_coef_logloss(labels, predictions, smooth=1e-10):
+def jaccard_coef_logloss(labels, predictions, smooth=1e-10, name="loss"):
     """ Loss function based on jaccard coefficient.
 
     Parameters
@@ -62,6 +62,6 @@ def jaccard_coef_logloss(labels, predictions, smooth=1e-10):
     falsepos = tf.reduce_sum(predictions) - truepos
     falseneg = tf.reduce_sum(labels) - truepos
     jaccard = tf.divide((truepos + smooth) , (smooth + truepos + falseneg + falsepos))
-    return -tf.log(jaccard + smooth)
+    return -tf.log(jaccard + smooth, name=name)
     #return 1 - jaccard
 

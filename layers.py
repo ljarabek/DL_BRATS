@@ -1,10 +1,18 @@
 import tensorflow as tf
 from tensorflow.contrib.layers import xavier_initializer, l2_regularizer
+from configparser import ConfigParser
 
 
 seed = 42
-l2_regularization = 0.0
-
+#l2_regularization = 0.0
+"""READ CONFIG"""
+cp = ConfigParser()
+cp.read("config.ini")
+cfg = cp['DEFAULT']
+#val_size = int(cfg['val_size'])
+for d in cfg:
+    print("%s = %s"%(d, cfg[d]))
+    exec("%s = %s"%(d, cfg[d]))
 
 def batch_norm(x, n_out, phase_train):
     """
