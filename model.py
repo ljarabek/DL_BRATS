@@ -34,9 +34,7 @@ cp.read("config.ini")
 cfg = cp['DEFAULT']
 #val_size = int(cfg['val_size'])
 for d in cfg:
-    print("%s = %s"%(d, cfg[d]))
     exec("%s = %s"%(d, cfg[d]))     # loads all variables from config.ini DEFAULT
-print(batches)
 
 _input, _answer = getBatchTraining()
 
@@ -98,7 +96,7 @@ tf.summary.histogram("exp3", exp3)
 merged = tf.summary.merge_all()           # black magic
 
 sess = tf.Session()
-train_model(sess)
+train_model(sess, noise = 0.1)
 
 """with tf.Session() as sess:
 

@@ -154,12 +154,10 @@ def getBatchVal():
 
 
 def getBatchTest(returnID=False):
-    key = rand.choice(list(dctTest))
+    key = rand.choice(list(dctTest)) #list(dctTest)??
     arr = []
     for i in range(4):
-        arr.append(standardize(getMaskedArrayTest(key, mod=i),
-                               i))
-
+        arr.append(standardize(getMaskedArrayTest(key, mod=i), i))
     data = np.ma.masked_array(arr).filled(0)
     if returnID:
         return np.expand_dims(data, 0), key
@@ -219,6 +217,7 @@ def outputToChannels(id):
 
 
 def channelsToOutput(image, ID=0):  ## TODO : dub ven ID pr getbatchTest!!
+    image = np.array(image)
     if image.shape[0] == 1:  # da ignorira batch=1
         image = image[0]
     return np.argmax(image, axis=0) #, ID
