@@ -109,6 +109,7 @@ def interpolation(input,  name="interp_2x", no_filters = 4):
         z_ *=2
         output_shape = tf.constant([b_,x_,y_,z_,ch_], dtype= tf.int32)
     return tf.nn.conv3d_transpose(input, filter=fil,output_shape = output_shape,strides=[1,2,2,2,1], padding= "SAME", name =  "interp_"+name)
+
 def prelu(input, alphax = 0.2):
     with tf.variable_scope("prelu"):
         alpha = tf.Variable(alphax, True, name="alpha")

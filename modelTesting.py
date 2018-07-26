@@ -37,7 +37,6 @@ def makedir(string,noise, save_dir=save_dir):
 
 def train_model(sess, noise, ckpt_dir = ""):
     """
-
     :param sess:
     :param noise:
     :param ckpt_dir:
@@ -49,18 +48,25 @@ def train_model(sess, noise, ckpt_dir = ""):
         checkpoint_dir = makedir("ckpt", noise, save_dir=main_dir)
     else:
         checkpoint_dir = ckpt_dir
+
     val_dir = makedir("val", noise, main_dir)
     train_dir = makedir("train", noise, main_dir)
     npy_dir = makedir("npy", noise, main_dir)
     test_dir = makedir("test", noise, main_dir)
-    logging.basicConfig(filename = main_dir + "logg.log", level=logging.DEBUG)
+
+    logging.basicConfig(filename = main_dir + "logg.log", level=logging.DEBUG, filemode="w")
+
     _input, _answer = getBatchTraining()
     merged = tf.summary.merge_all()
+
     sess.run(tf.global_variables_initializer())  # initialize variables
+
     train_writer = tf.summary.FileWriter(train_dir, sess.graph)  # write graph to tensorboard
     val_writer = tf.summary.FileWriter(val_dir, sess.graph)  # write graph to tensorboard
     saver = tf.train.Saver()
+
     ckpt = tf.train.get_checkpoint_state(checkpoint_dir=checkpoint_dir)  # loads existing checkpoint
+
     val_loss = 0.00
     val_loss_top = 1e5
     losses = []
@@ -74,15 +80,19 @@ def train_model(sess, noise, ckpt_dir = ""):
     else:
         learning_rate = lr_0
     top_loss = 1e5  # placeholder for lowest loss
+
     for i in range(batches):
         _input, _answer = getBatchTraining()
+
+        #adding noise
         _input = _input + np.random.normal(scale=noise, size=_input.shape)
         #COMPUTE LOSS AND TRAIN MODEL:
         otpt, loss_, summary, _ = sess.run(["output:0", "loss:0", merged, "train"],
                                            feed_dict={"input:0": _input, "phase_train:0": True, "answer:0": _answer,
                                                       "learning_rate:0": learning_rate})
         loss_ = -loss_
-        logging.info("loss: %s learning_rate = %s"%(str(loss_), learning_rate)) # log loss
+        logging.info("noise: %s loss: %s learning_rate = %s"%(str(noise), str(loss_), learning_rate)) # log loss
+
         if i % save_losses_every == 0:  # save losses and compute validation loss
             for dfdskjfmsdfm in range(val_size):
                 _input, _answer = getBatchVal()
@@ -95,11 +105,8 @@ def train_model(sess, noise, ckpt_dir = ""):
             losses.append([loss_, val_loss])
 
             val_writer.add_summary(summary_val, i//save_losses_every)
-            print(losses)
             np.save(npy_dir + "train_val_loss.npy", arr=losses)
             print("validation loss: %s , training loss: %s" % (val_loss, loss_))
-
-
 
             if i > top_loss_b and val_loss<val_loss_top:    # at best validation loss:
                 top_loss = loss_

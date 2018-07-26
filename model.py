@@ -13,6 +13,7 @@ from loss_function import *
 from layers import *
 from preprocessing import *
 from postprocessing import *
+from tqdm import tqdm
 
 from modelTesting import train_model
 
@@ -96,7 +97,13 @@ tf.summary.histogram("exp3", exp3)
 merged = tf.summary.merge_all()           # black magic
 
 sess = tf.Session()
-train_model(sess, noise = 0.1)
+
+# grid search noises
+for i in tqdm(range(8)):
+    n = i * 0.05
+    val , l = train_model(sess, noise = n)
+
+    np.save("top_%s.npy"%n, [val, l])
 
 """with tf.Session() as sess:
 
