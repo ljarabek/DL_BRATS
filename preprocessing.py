@@ -145,11 +145,6 @@ def getInput(flair, t1, t1c, t2):
     data = np.ma.masked_array(arr).filled(0)
     return np.expand_dims(data, 0)
 
-<<<<<<< HEAD
-#valIterable = iter(dctVal)
-=======
->>>>>>> 1dd46a445b85dd0b79bb801777842a16bab078a9
-
 valIterable = iter(dctVal)
 
 """def getBatchVal():
