@@ -129,9 +129,28 @@ def getBatchTraining():
 
     return np.expand_dims(data, 0), np.expand_dims(answers, 0)
 
+#sprjeme poti slik flair,t1,t1c in t2 in vrne ustrezen input za model
+def getInput(flair, t1, t1c, t2):
+    flair = ma.masked_values(sitk.GetArrayFromImage(sitk.ReadImage(flair))[x_0 - x_r: x_0 + x_r, y_0 - y_r: y_0 + y_r, z_0 - z_r: z_0 + z_r],0)
+    t1 = ma.masked_values(sitk.GetArrayFromImage(sitk.ReadImage(t1))[x_0 - x_r: x_0 + x_r, y_0 - y_r: y_0 + y_r, z_0 - z_r: z_0 + z_r],0)
+    t1c = ma.masked_values(sitk.GetArrayFromImage(sitk.ReadImage(t1c))[x_0 - x_r: x_0 + x_r, y_0 - y_r: y_0 + y_r, z_0 - z_r: z_0 + z_r],0)
+    t2 = ma.masked_values(sitk.GetArrayFromImage(sitk.ReadImage(t2))[x_0 - x_r: x_0 + x_r, y_0 - y_r: y_0 + y_r, z_0 - z_r: z_0 + z_r],0)
 
+    pics =  [flair, t1, t1c, t2]
+    arr = []
+
+    for i in range(4):
+        arr.append(standardize(pics[i],
+                               i))
+    data = np.ma.masked_array(arr).filled(0)
+    return np.expand_dims(data, 0)
+
+<<<<<<< HEAD
 #valIterable = iter(dctVal)
+=======
+>>>>>>> 1dd46a445b85dd0b79bb801777842a16bab078a9
 
+valIterable = iter(dctVal)
 
 """def getBatchVal():
     # vrne sliko po sliko za validacijo, ko večkrat kličeš, loopa čez dctVal,
