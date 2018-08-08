@@ -130,10 +130,10 @@ def getBatchTraining():
     return np.expand_dims(data, 0), np.expand_dims(answers, 0)
 
 
-valIterable = iter(dctVal)
+#valIterable = iter(dctVal)
 
 
-def getBatchVal():
+"""def getBatchVal():
     # vrne sliko po sliko za validacijo, ko večkrat kličeš, loopa čez dctVal,
     # ko pride do konca, se resetira na začetek
     global valIterable
@@ -150,8 +150,21 @@ def getBatchVal():
                                i))
 
     data = np.ma.masked_array(arr).filled(0)
-    return np.expand_dims(data, 0), np.expand_dims(answers, 0)
+    return np.expand_dims(data, 0), np.expand_dims(answers, 0)"""
 
+#hiter popravek
+def getBatchVal(key):
+    #vrne sliko za key "i", deluje samo če za validation dictionary vzamemo začetnih i slik.
+    #oziroma je treba validation dictionary tko nastimat
+    assert(1<=key<=val_size)
+    arr = []
+    answers = outputToChannelsVal(key)
+    for i in range(4):
+        arr.append(standardize(getMaskedArrayVal(key, mod=i),
+                               i))
+
+    data = np.ma.masked_array(arr).filled(0)
+    return np.expand_dims(data, 0), np.expand_dims(answers, 0)
 
 def getBatchTest(returnID=False):
     key = rand.choice(list(dctTest)) #list(dctTest)??
@@ -159,6 +172,7 @@ def getBatchTest(returnID=False):
     for i in range(4):
         arr.append(standardize(getMaskedArrayTest(key, mod=i), i))
     data = np.ma.masked_array(arr).filled(0)
+
     if returnID:
         return np.expand_dims(data, 0), key
     else:

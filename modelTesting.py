@@ -94,8 +94,8 @@ def train_model(sess, noise, ckpt_dir = ""):
         logging.info("noise: %s loss: %s learning_rate = %s"%(str(noise), str(loss_), learning_rate)) # log loss
 
         if i % save_losses_every == 0:  # save losses and compute validation loss
-            for dfdskjfmsdfm in range(val_size):
-                _input, _answer = getBatchVal()
+            for j in range(1,val_size+1):
+                _input, _answer = getBatchVal(j)
 
                 otpt, summary_val, v_loss = sess.run(["output:0", merged, "loss:0"],
                                          feed_dict={"input:0": _input, "phase_train:0": False, "answer:0": _answer})
@@ -117,8 +117,8 @@ def train_model(sess, noise, ckpt_dir = ""):
                 np.save(npy_dir + "train_val_best_loss.npy", arr=[loss_,val_loss])
 
                 _input, ID = getBatchTest(True)
-                otpt = sess.run(["output:0"], feed_dict={"input:0": _input, "phase_train:0": False,})
-                otpt = channelsToOutput(otpt)
+                otpt = sess.run(["output:0"], feed_dict={"input:0": _input, "phase_train:0": False})
+                otpt = otpt[0]
                 saveSegmentation(_input[0, 2], otpt, i, test_dir)
 
             val_loss = 0.0

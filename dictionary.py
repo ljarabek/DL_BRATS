@@ -78,6 +78,7 @@ for file in os.listdir(train_path2):
 test_path = "C:\BRATS\Testing\HGG_LGG"
 #os.chdir(test_path)
 
+
 testDictionary = {}
 
 for file in os.listdir(test_path):
@@ -89,6 +90,10 @@ for file in os.listdir(test_path):
     # shranimo v slovar
     testDictionary[id] = endFiles
     id += 1
+
+#zbrisati zadnji dve vrstici v test dictionary
+del testDictionary[385]
+del testDictionary[386]
 
 #vrne slovar slik za učiti
 def get():
@@ -105,6 +110,8 @@ def getVal():
 #vrne slovar slik za testiranje natančnosti
 def getTest():
     return testDictionary
+
+print(testDictionary)
 
 """
 k = sitk.GetArrayFromImage(sitk.ReadImage(arr[52])) #tole dela
