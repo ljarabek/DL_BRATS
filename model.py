@@ -99,8 +99,9 @@ merged = tf.summary.merge_all()           # black magic
 sess = tf.Session()
 
 # grid search noises
-for i in tqdm(range(2,8)):
+for i in range(0,2):
     n = i * 0.05
+    print("noise " +str(n))
     val , l = train_model(sess, noise = n)
 
     np.save("top_%s.npy"%n, [val, l])

@@ -119,7 +119,8 @@ def train_model(sess, noise, ckpt_dir = ""):
                 _input, ID = getBatchTest(True)
                 otpt = sess.run(["output:0"], feed_dict={"input:0": _input, "phase_train:0": False})
                 otpt = otpt[0]
-                saveSegmentation(_input[0, 2], otpt, i, test_dir)
+                print(np.array(otpt).shape)
+                #saveSegmentation(_input[0, 2], otpt, i, test_dir) TO DO : FIX
 
             val_loss = 0.0
 
@@ -132,5 +133,5 @@ def train_model(sess, noise, ckpt_dir = ""):
             print("No progress in last %s steps, stopping training" %timeout_batches)
             return val_loss_top, top_loss
             #break
-        print(loss_, learning_rate , i)
+        #print(loss_, learning_rate , i)
     return
