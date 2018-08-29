@@ -91,10 +91,14 @@ for file in os.listdir(test_path):
     testDictionary[id] = endFiles
     id += 1
 
-#zbrisati zadnji dve vrstici v test dictionary
-del testDictionary[385]
-del testDictionary[386]
+#zbrisati tiste ključe, ki so prazni
+empty = []
+for key in testDictionary.keys():
+    if testDictionary[key]==[]:
+        empty.append(key)
 
+for key in empty:
+    del testDictionary[key]
 #vrne slovar slik za učiti
 def get():
     return trainingDictionary

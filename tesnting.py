@@ -21,7 +21,7 @@ from modelTesting import train_model
 """III IMPORTANT III"""
 
 
-
+rand.seed(10)
 
 DCT = dictionary.get()
 print(len(DCT))
@@ -103,11 +103,23 @@ loader = tf.train.Saver()
 ckpt = tf.train.get_checkpoint_state(checkpoint_dir='C:\modelLogs\main_0.2_1533311066.683526\ckpt_0.2_1533311066.683526')
 load(loader, sess, ckpt.model_checkpoint_path)
 
+
 _input, ID = getBatchTest(True)
 otpt, summary = sess.run([output, merged], feed_dict={input: _input, phase_train: True, answer: _answer})
 #otpt = channelsToOutput(otpt)
+print(np.shape(otpt))
 otpt = otpt[0]
 saveSegmentation(_input[0, 2], otpt, 10,"c:/seg/")
+
+def diceCoef(arr1, arr2):
+    presek =np.sum(np.multiply(arr1,arr2))
+
+    return 2*presek/(np.sum(arr1)+np.sum(arr2))
+
+
+
+
+
 
 
 """

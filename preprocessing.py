@@ -244,6 +244,7 @@ def outputToChannels(id):
     return np.stack((type0, type1, type2, type3, type4))
 
 
+
 def channelsToOutput(image, ID=0):  ## TODO : dub ven ID pr getbatchTest!!
     image = np.array(image)
     if image.shape[0] == 1:  # da ignorira batch=1

@@ -77,3 +77,29 @@ def save_numpy(picture, batch, dir='C:/activations/', filename = "/graph.png"):
 #        display_numpy(channelsToOutput(a_))
 #        display_numpy(channelsToOutput(a_[0]))
 #
+def getOutput(out):
+    "Funkcija prejme output oblike (1,5,128,160,144) in vrne matriko (128,160,144), ki ima na mestih kjer je zdrava 0 ostalo paštevila 1-4"
+    newOut = np.zeros(shape=(128, 160, 144))
+    out = out[0]
+    for i in range(1,5):
+        newOut[out[i] == 1]= i
+    return newOut
+
+def saveSeg( arrayT1c,out, batch, dir='C:/activations_Segmentations/', filename = "graph.png"):
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+
+    fig = plt.figure()
+    iter = int(len(arrayT1c) /30)
+
+    for num,slice in enumerate(arrayT1c):
+        if num>=30:
+            break
+        y = fig.add_subplot(5,6,num+1)
+        y.imshow(arrayT1c[num * iter], cmap='gray')
+        y.imshow(out[num * iter], cmap="Reds", alpha=0.25)
+
+    plt.savefig(dir + str(batch)+filename, dpi=500, format = "png")
+    plt.close('all')
+    return
+
