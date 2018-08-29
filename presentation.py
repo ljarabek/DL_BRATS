@@ -25,13 +25,18 @@ def process_key(event):
 
 def previous_slice(ax):
     volume = ax.volume
+    segmentation = ax.segmentation
     ax.index = (ax.index - 1) % volume.shape[0]  # wrap around using %
     ax.images[0].set_array(volume[ax.index])
+    ax.images[1].set_array(segmentation[ax.index])
+
 
 def next_slice(ax):
     volume = ax.volume
+    segmentation = ax.segmentation
     ax.index = (ax.index + 1) % volume.shape[0]
     ax.images[0].set_array(volume[ax.index])
+    ax.images[1].set_array(segmentation[ax.index])
 
 
 #sprejeme 3D numpy array in prikaze sliko (s tipkama J in K se pomikas skozi slice)
@@ -43,6 +48,18 @@ def multi_slice_viewer(volume):
     ax.imshow(volume[ax.index],cmap='gray')
     fig.canvas.mpl_connect('key_press_event', process_key)
     plt.show()
+
+def seg_viewer(volume, segmentation):
+    remove_keymap_conflicts({'j', 'k'})
+    fig, ax = plt.subplots()
+    ax.volume = volume
+    ax.segmentation = segmentation
+    ax.index = volume.shape[0] // 2
+    ax.imshow(volume[ax.index],cmap='gray')
+    ax.imshow(segmentation[ax.index], cmap='Reds', alpha=0.2)
+    fig.canvas.mpl_connect('key_press_event', process_key)
+    plt.show()
+
 
 #prikaže 3D numpy array z večimi slici/odseki slike
 def display_numpy(picture):

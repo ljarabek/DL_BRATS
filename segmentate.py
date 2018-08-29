@@ -14,7 +14,7 @@ from layers import *
 from preprocessing import *
 from postprocessing import *
 from tqdm import tqdm
-
+from presentation import seg_viewer, multi_slice_viewer
 from modelTesting import train_model
 
 DCT = dictionary.get()
@@ -32,6 +32,14 @@ for d in cfg:
 
 
 def segmentate(flair, t1,t1c,t2):
+    """
+
+    :param flair:  path to .mha flair
+    :param t1:  path to .mha t1
+    :param t1c:  path to .mha t1c
+    :param t2:  path to .mha t2
+    :return:  segmentation according to BRATS2015 rules
+    """
     _input= getInput(flair,t1,t1c,t2)
 
     print(_input.shape)  # (1, 4, 128, 160, 144)
@@ -79,7 +87,7 @@ def segmentate(flair, t1,t1c,t2):
     load(loader, sess, ckpt.model_checkpoint_path)
 
 
-    _input, ID = getBatchTest(True)
+    #_input, ID = getBatchTest(True)
     otpt = sess.run([output], feed_dict={input: _input, phase_train: True})
     otpt= otpt[0][0]
     #otpt = channelsToOutput(otpt)
@@ -92,4 +100,7 @@ def segmentate(flair, t1,t1c,t2):
 
     return otpt
 
-predict(DCT[15][0],DCT[15][1],DCT[15][2],DCT[15][3])
+#multi_slice_viewer(np.array(resizeOutput(segmentate(DCT[15][0],DCT[15][1],DCT[15][2],DCT[15][3]))))
+answer = segmentate(DCT[11][0],DCT[11][1],DCT[11][2],DCT[11][3])
+#print(np.array(getInput(DCT[11][0],DCT[11][1],DCT[11][2],DCT[11][3])[0,2]).shape)
+seg_viewer(np.array(getInput(DCT[11][0],DCT[11][1],DCT[11][2],DCT[11][3])[0,2]),np.array(answer))
